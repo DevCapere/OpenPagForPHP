@@ -10,7 +10,7 @@ docker-compose up -d
 ## Instalando via composer:
 
 
-Adicione "devcapere/openpagforphp": "dev-master" ao seu composer.json e rode update ou install
+Adicione `"devcapere/openpagforphp": "dev-master"` ao seu composer.json e rode update ou install
 
 ## Status de desenvolvimento
 <table>
