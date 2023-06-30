@@ -134,7 +134,7 @@ class Registro3A extends Generico3
         'agencia_dv_favorecido' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Conta Corrente do Favorecido            030 041 9(012) Nota G003
@@ -148,28 +148,28 @@ class Registro3A extends Generico3
         'conta_dv_favorecido' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Dígito Verificador da Agência/Conta     043 043 X(001) Nota G003
         'agencia_conta_dv_favorecido' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Nome do Favorecido                      044 073 X(030) Obrigatório
         'nome_favorecido' => array(
             'tamanho' => 30,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Nro. do Documento Cliente               074 093 X(020) Nota G006
         'documento_favorecido' => array(
             'tamanho' => 20,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Data do Pagamento                       094 101 9(008) DDMMAAAA
@@ -206,7 +206,7 @@ class Registro3A extends Generico3
         'nosso_numero' => array(
             'tamanho' => 20,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Data Real do Pagamento (Retorno)    155 162 9(008) DDMMAAAA

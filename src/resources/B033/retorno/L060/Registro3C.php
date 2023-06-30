@@ -129,7 +129,7 @@ class Registro3C extends Generico3
         'agencia_dv_favorecido' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Conta Corrente do Favorecido            099 110 9(012) Zeros
@@ -143,14 +143,14 @@ class Registro3C extends Generico3
         'conta_dv_favorecido' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Digito Verificador da Agência/Conta     112 112 X(001) Branco
         'agencia_conta_dv_favorecido' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Valor do INSS                           113 127 9(013)V2 Zeros

@@ -40,7 +40,7 @@ class Registro3N7 extends Generico3
         'codigo_tributo' => array(
             'tamanho' => 6,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Tipo de Identificação do Contribuinte    117 118 9(002) Nota N003

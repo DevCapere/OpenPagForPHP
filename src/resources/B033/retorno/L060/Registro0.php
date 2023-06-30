@@ -80,7 +80,7 @@ class Registro0 extends Generico0
         'codigo_beneficiario' => array(
             'tamanho' => 20,
             'default' => '0',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Agência Mantenedora da Conta             053 057 9(005) Nota G003
@@ -94,7 +94,7 @@ class Registro0 extends Generico0
         'agencia_dv' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Número da Conta Corrente                 059 070 9(012) Nota G003
@@ -108,14 +108,14 @@ class Registro0 extends Generico0
         'conta_dv' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Dígito Verificador da Agência / Conta    072 072 X(001) Branco
         'agencia_conta_dv' => array(
             'tamanho' => 1,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Nome da Empresa                          073 102 X(030) Obrigatório
