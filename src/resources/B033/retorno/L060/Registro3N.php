@@ -146,7 +146,7 @@ class Registro3N extends Generico3
     }
 
     private $_infoComplementarTributo;
-    protected function get_infoComplementarTributo($value) {
+    protected function get_infoComplementarTributo() {
         if (!empty($this->_infoComplementarTributo)) {
             return $this->_infoComplementarTributo;
         }
@@ -159,7 +159,7 @@ class Registro3N extends Generico3
 
         $class = 'PagForPHP\\resources\\B' . RetornoAbstract::$banco . '\\retorno\\' . RetornoAbstract::$layout . '\Registro3' . $tipo;
 
-        return new $class($value);
+        return new $class($this->info_complementar_tributo);
 
 
         // N014. Código de Identificação do Tributo

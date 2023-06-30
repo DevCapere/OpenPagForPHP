@@ -133,7 +133,7 @@ abstract class RetornoAbstract
     }
     /**
      * Retorna o a versão do layout
-     * @return string
+     * @return array
      */
     public function getRegistrosRaiz()
     {
