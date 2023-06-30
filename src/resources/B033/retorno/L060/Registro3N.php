@@ -145,17 +145,21 @@ class Registro3N extends Generico3
         RetornoAbstract::$linesCounter++;
     }
 
-    protected function set_info_complementar_tributo($value) {
-        $tipo = $this->getLayoutComplementar();
+    private $_infoComplementarTributo;
+    protected function get_infoComplementarTributo($value) {
+        if (!empty($this->_infoComplementarTributo)) {
+            return $this->_infoComplementarTributo;
+        }
+
+        $tipo = $this->get_layoutComplementar();
 
         if (empty($tipo)) {
-            $this->data['info_complementar_tributo'] = $value;
-            return;
+            return NULL;
         }
 
         $class = 'PagForPHP\\resources\\B' . RetornoAbstract::$banco . '\\retorno\\' . RetornoAbstract::$layout . '\Registro3' . $tipo;
 
-        $this->data['info_complementar_tributo'] = new $class($value);
+        return new $class($value);
 
 
         // N014. Código de Identificação do Tributo
@@ -169,7 +173,7 @@ class Registro3N extends Generico3
         // 27 = Tributo – DPVAT – SP, PR e MG
     }
 
-    private function getLayoutComplementar() {
+    public function get_layoutComplementar() {
         $tipo = substr($this->linha, 132, 2);
         $map = [
             '16' => 'N2',
