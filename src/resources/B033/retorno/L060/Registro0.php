@@ -38,7 +38,7 @@ class Registro0 extends Generico0
         'codigo_banco' => array(
             'tamanho' => 3,
             'default' => '033',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Lote de Serviço                          004 007 9(004) 0000

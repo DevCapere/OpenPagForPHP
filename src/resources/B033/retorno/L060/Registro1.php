@@ -38,7 +38,7 @@ class Registro1 extends Generico1
         'codigo_banco' => array(
             'tamanho' => 3,
             'default' => '033',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Lote de Serviço                          004 007 9(004) Nota G001
@@ -244,6 +244,7 @@ class Registro1 extends Generico1
             $this->data['codigo_lote'] == abs(substr(RetornoAbstract::$lines[RetornoAbstract::$linesCounter], 3, 4)) && 
             substr(RetornoAbstract::$lines[RetornoAbstract::$linesCounter], 7, 1) == '3'
         ) {
+            $linhaAtual = RetornoAbstract::$linesCounter;
             $this->inserirRegistro3Segmento('A');
             //# SEGMENTO B IMPORTADO DENTRO DO A POIS DEPENDE DE INFORMAÇÃO DO A PARA SABER O LAYOUT
             $this->inserirRegistro3Segmento('C');
@@ -253,6 +254,11 @@ class Registro1 extends Generico1
             $this->inserirRegistro3Segmento('O');
             $this->inserirRegistro3Segmento('W');
             $this->inserirRegistro3Segmento('Z');
+
+            if ($linhaAtual == RetornoAbstract::$linesCounter) {
+                // A linha atual não tem nenhum registro do Layout atual
+                RetornoAbstract::$linesCounter++;
+            }
         }
     }
 

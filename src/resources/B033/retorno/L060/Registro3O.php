@@ -41,7 +41,7 @@ class Registro3O extends Generico3
         'codigo_banco' => array(
             'tamanho' => 3,
             'default' => '033',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Lote de Serviço                          004 007 9(004) Nota G001

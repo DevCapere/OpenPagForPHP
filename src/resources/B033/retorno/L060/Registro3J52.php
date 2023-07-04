@@ -33,7 +33,7 @@ use PagForPHP\DetalhaMovimentoRetorno;
  * @version 11.3.1
  * @link https://cms.santander.com.br/sites/WPS/documentos/arq-layout-pagamento-fornecedores-mai22/23-03-07_150124_pagamento_a_fornecedores_layout_cnab_240_v11.3.2_newpt.pdf
  */
-class Registro3J extends Generico3
+class Registro3J52 extends Generico3
 {
 
     protected $meta = array(
@@ -41,7 +41,7 @@ class Registro3J extends Generico3
         'codigo_banco' => array(
             'tamanho' => 3,
             'default' => '033',
-            'tipo' => 'int',
+            'tipo' => 'alfa',
             'required' => true
         ),
         // Lote de Serviço                          004 007 9(004) Nota G001
