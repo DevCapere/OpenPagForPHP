@@ -219,7 +219,7 @@ class Registro1 extends Generico1
         // Ocorrências para o Retorno               231 240 X(010) Nota G007
         'codigo_ocorrencia' => array(
             'tamanho' => 10,
-            'default' => '',
+            'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
@@ -270,5 +270,14 @@ class Registro1 extends Generico1
             $class = 'PagForPHP\resources\\B' . RetornoAbstract::$banco . '\retorno\\' . RetornoAbstract::$layout . '\Registro3' . $segmento;
             $this->children[] = new $class(RetornoAbstract::$lines[RetornoAbstract::$linesCounter]);
         }
+    }
+    /**
+     * Retorna um array com a lista das descrições de comando e detalhes do
+     * comando para o movimento
+     * 
+     * @return array
+     */
+    public function get_arrayOcorrencias(){
+        return CodigosOcorrencia::getRelacao($this->codigo_ocorrencia);
     }
 }

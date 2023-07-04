@@ -305,10 +305,6 @@ class Registro3A extends Generico3
      * @return array
      */
     public function get_arrayOcorrencias(){
-        $detalhes = new DetalhaMovimentoRetorno('033','240');
-
-        $codigoMovimento = str_pad($this->data['codigo_movimento'], 2, 0, STR_PAD_LEFT);
-
-        return $detalhes->getArrayTxtOcorrencias($codigoMovimento, $this->data['codigo_ocorrencia']);
+        return CodigosOcorrencia::getRelacao($this->codigo_ocorrencia);
     }
 }

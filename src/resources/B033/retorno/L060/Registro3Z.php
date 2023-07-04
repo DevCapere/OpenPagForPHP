@@ -112,4 +112,13 @@ class Registro3Z extends Generico3
         RetornoAbstract::$linesCounter++;
     }
 
+    /**
+     * Retorna um array com a lista das descrições de comando e detalhes do
+     * comando para o movimento
+     * 
+     * @return array
+     */
+    public function get_arrayOcorrencias(){
+        return CodigosOcorrencia::getRelacao($this->codigo_ocorrencia);
+    }
 }
