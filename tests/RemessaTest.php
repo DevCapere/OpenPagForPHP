@@ -25,7 +25,7 @@ class RemessaTest extends TestCase
     /**
      * Setup
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         
@@ -52,7 +52,7 @@ class RemessaTest extends TestCase
     /**
      * Shutdown
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->remessa = null;
         

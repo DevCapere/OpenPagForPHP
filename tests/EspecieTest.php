@@ -21,7 +21,7 @@ class EspecieTest extends TestCase
     /**
      * Setup
      */
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
         
@@ -31,7 +31,7 @@ class EspecieTest extends TestCase
     /**
      * Shutdown
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->especie = null;
         

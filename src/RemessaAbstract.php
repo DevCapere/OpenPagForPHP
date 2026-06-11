@@ -71,6 +71,9 @@ abstract class RemessaAbstract {
      */
     public function addLote(array $data) {
         if (strpos(self::$layout, '240')) {
+            if (!empty(self::$hearder->children)) {
+                self::$loteCounter++;
+            }
             $class = '\PagForPHP\resources\\B' . self::$banco . '\remessa\\' . self::$layout . '\Registro1';
             $loteData = $data ? $data : RemessaAbstract::$entryData;
             $lote = new $class($loteData);
@@ -79,7 +82,6 @@ abstract class RemessaAbstract {
             $lote = $this;
         }
         return $lote;
-        self::$loteCounter++;
     }
 
     /**

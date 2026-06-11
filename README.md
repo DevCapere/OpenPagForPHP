@@ -28,6 +28,13 @@ Adicione `"devcapere/openpagforphp": "dev-master"` ao seu composer.json e rode u
         <td>Desenvolvimento</td>
         <td>Beta</td>
     </tr>
+    <tr>
+        <td>Itaú</td>
+        <td>Cnab240</td>
+        <td>080</td>
+        <td>Em desenvolvimento (header/lote/TED A+B/Boleto J+J52/trailer)</td>
+        <td>Pendente</td>
+    </tr>
 </table>
 
 
