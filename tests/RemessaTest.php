@@ -15,6 +15,8 @@ use ReflectionClass;
  */
 class RemessaTest extends TestCase
 {
+    private const LAYOUT_CAIXA_CLASS = 'PagForPHP\resources\B104\remessa\cnab240_SIGCB\Registro0';
+
     /**
      * The Remessa Object
      * 
@@ -28,6 +30,10 @@ class RemessaTest extends TestCase
     public function setUp(): void
     {
         parent::setUp();
+
+        if (!class_exists(self::LAYOUT_CAIXA_CLASS)) {
+            $this->markTestSkipped('Layout B104/cnab240_SIGCB não implementado neste fork.');
+        }
         
         $this->remessa = new Remessa(
             '104', 

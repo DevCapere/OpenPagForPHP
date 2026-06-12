@@ -44,9 +44,12 @@ abstract class RetornoAbstract
 
         if ($length == 240 || $length == 241) {
             $bytes = 240;
-            $layout_versao = substr($lines[0], 163, 3);
             $codigo_banco = substr($lines[0], 0, 3);
             $codigo_tipo = substr($lines[0], 142, 1);
+            // Itaú SISPAG: versão do layout no header (pos. 015-017 = índice 14, len 3)
+            $layout_versao = $codigo_banco === '341'
+                ? substr($lines[0], 14, 3)
+                : substr($lines[0], 163, 3);
         } elseif ($length == 400 || $length == 401) {
             $bytes = 400;
             $layout_versao = '400';
