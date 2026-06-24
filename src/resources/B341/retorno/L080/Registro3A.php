@@ -29,7 +29,7 @@ class Registro3A extends AbstractDetalhe {
         'valor' => ['tamanho' => 13, 'default' => '0', 'tipo' => 'decimal', 'precision' => 2, 'required' => true],
         'nosso_numero' => ['tamanho' => 15, 'default' => ' ', 'tipo' => 'alfa', 'required' => true],
         'filler1' => ['tamanho' => 5, 'default' => ' ', 'tipo' => 'alfa', 'required' => true],
-        'data_efetiva' => ['tamanho' => 8, 'default' => '0', 'tipo' => 'int', 'required' => true],
+        'data_efetiva' => ['tamanho' => 8, 'default' => '0', 'tipo' => 'date', 'required' => true],
         'valor_efetivo' => ['tamanho' => 13, 'default' => '0', 'tipo' => 'decimal', 'precision' => 2, 'required' => true],
         'finalidade_detalhe' => ['tamanho' => 20, 'default' => ' ', 'tipo' => 'alfa', 'required' => true],
         'numero_documento' => ['tamanho' => 6, 'default' => '0', 'tipo' => 'int', 'required' => true],
@@ -58,6 +58,17 @@ class Registro3A extends AbstractDetalhe {
 
     public function get_arrayOcorrencias(): array {
         return CodigosOcorrencia::getRelacao($this->ocorrencias);
+    }
+
+    public function set_data_efetiva($value): void {
+        $digits = preg_replace('/\D/', '', (string) $value);
+        if ($digits === '' || preg_match('/^0+$/', $digits)) {
+            $this->data['data_efetiva'] = '';
+            return;
+        }
+
+        $data = \DateTime::createFromFormat('dmY', sprintf('%08d', $digits));
+        $this->data['data_efetiva'] = $data ? $data->format('Y-m-d') : '';
     }
 
 }

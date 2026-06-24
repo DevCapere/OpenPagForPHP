@@ -22,7 +22,7 @@ class RetornoB341Test extends TestCase {
         ];
     }
 
-    private function remessaTedParaRetorno(string $ocorrenciaSegmentoA = '00        '): string {
+    private function remessaTedParaRetorno(string $ocorrenciaSegmentoA = '00        ', ?string $dataEfetiva = '15062026'): string {
         $remessa = new Remessa('341', 'cnab240', $this->headerData());
         $lote = $remessa->addLote([
             'tipo_pagamento'  => '20',
@@ -44,6 +44,11 @@ class RetornoB341Test extends TestCase {
         $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
         $linhas[0] = substr_replace($linhas[0], '2', 142, 1);
         $linhas[2] = substr_replace($linhas[2], $ocorrenciaSegmentoA, 230, 10);
+        if ($dataEfetiva !== null) {
+            $linhas[2] = substr_replace($linhas[2], $dataEfetiva, 154, 8);
+            $valorEnc = substr($linhas[2], 119, 15);
+            $linhas[2] = substr_replace($linhas[2], $valorEnc, 162, 15);
+        }
 
         return implode("\r\n", $linhas) . "\r\n";
     }
@@ -93,6 +98,8 @@ class RetornoB341Test extends TestCase {
         $this->assertEquals('237', $segmentoA->codigo_banco_favorecido);
         $this->assertStringContainsString('FORNECEDOR TESTE LTDA', $segmentoA->nome_favorecido);
         $this->assertSame('00', trim($segmentoA->ocorrencias));
+        $this->assertSame('2026-06-15', $segmentoA->data_efetiva);
+        $this->assertSame('2026-06-15', $segmentoA->data_pagamento);
 
         $ocorrencias = $segmentoA->get_arrayOcorrencias();
         $this->assertCount(1, $ocorrencias);
@@ -103,6 +110,13 @@ class RetornoB341Test extends TestCase {
         $segmentoB = $filhosA[0];
         $this->assertSame('B', $segmentoB->codigo_segmento);
         $this->assertEquals('98765432000111', $segmentoB->numero_inscricao_favorecido);
+    }
+
+    public function testParseRetornoTedDataEfetivaZerada(): void {
+        $retorno = new Retorno($this->remessaTedParaRetorno('00        ', null));
+        $segmentoA = $retorno->getRegistros(1)[0];
+
+        $this->assertSame('', $segmentoA->data_efetiva);
     }
 
     public function testParseRetornoBoletoSegmentosJJ52(): void {
