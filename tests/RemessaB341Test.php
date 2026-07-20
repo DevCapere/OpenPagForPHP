@@ -260,4 +260,85 @@ class RemessaB341Test extends TestCase {
         $this->assertSame('31', \PagForPHP\resources\B341\remessa\cnab240\Registro3J::formaPagamentoPorCodigoBarras($outro));
     }
 
+    public function testRemessaPixTransferenciaComChaveEmail(): void {
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '45',
+            'versao_layout'   => '040',
+        ]);
+
+        $lote->inserirTransferencia([
+            'nome_favorecido'      => 'FORNECEDOR PIX LTDA',
+            'documento_favorecido' => '98765432000111',
+            'documento_id'         => 'PIX-001',
+            'data_pagamento'       => '2026-06-15',
+            'valor'                => 99.90,
+            'chave_pix'            => 'fornecedor@exemplo.com.br',
+            'tipo_chave_pix'       => '02',
+        ]);
+
+        $conteudo = rtrim($remessa->getText(), "\r\n");
+        $linhas = explode("\r\n", $conteudo);
+
+        $this->assertCount(6, $linhas);
+        foreach ($linhas as $linha) {
+            $this->assertSame(240, strlen($linha));
+        }
+
+        $headerLote = $linhas[1];
+        $this->assertSame('45', substr($headerLote, 11, 2));
+
+        $segmentoA = $linhas[2];
+        $this->assertSame('A', substr($segmentoA, 13, 1));
+        $this->assertSame('009', substr($segmentoA, 17, 3));
+        $this->assertSame('04', substr($segmentoA, 112, 2));
+
+        $segmentoB = $linhas[3];
+        $this->assertSame('B', substr($segmentoB, 13, 1));
+        $this->assertSame('02', substr($segmentoB, 14, 2)); // pos 015-016 (Nota 37)
+        $this->assertSame(' ', substr($segmentoB, 16, 1));  // pos 017
+        $chaveNoArquivo = rtrim(substr($segmentoB, 127, 100)); // pos 128-227
+        $this->assertSame('FORNECEDOR@EXEMPLO.COM.BR', $chaveNoArquivo);
+        $this->assertStringContainsString('FORNECEDOR@EXEMPLO.COM.BR', strtoupper($segmentoB));
+    }
+
+    /**
+     * @dataProvider providerChavesPix
+     */
+    public function testRemessaPixTiposDeChave(string $tipoChave, string $chave): void {
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '45',
+            'versao_layout'   => '040',
+        ]);
+
+        $lote->inserirTransferencia([
+            'nome_favorecido'      => 'PIX TESTE',
+            'documento_favorecido' => '12345678901',
+            'documento_id'         => 'PIX-T',
+            'data_pagamento'       => '2026-06-15',
+            'valor'                => 10.00,
+            'chave_pix'            => $chave,
+            'tipo_chave_pix'       => $tipoChave,
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $segmentoB = $linhas[3];
+
+        $this->assertSame($tipoChave, substr($segmentoB, 14, 2));
+        $this->assertStringContainsString(strtoupper($chave), strtoupper($segmentoB));
+    }
+
+    public static function providerChavesPix(): array {
+        return [
+            'telefone'  => ['01', '+5511999998888'],
+            'email'     => ['02', 'pix@teste.com'],
+            'cpf'       => ['03', '12345678901'],
+            'cnpj'      => ['03', '12345678000199'],
+            'aleatoria' => ['04', '123e4567-e89b-12d3-a456-426614174000'],
+        ];
+    }
+
 }

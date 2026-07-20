@@ -6,7 +6,9 @@ use PagForPHP\RemessaAbstract;
 use PagForPHP\resources\generico\remessa\cnab240\Generico3;
 
 /**
- * SISPAG Itaú — Segmento A (TED / transferência).
+ * SISPAG Itaú — Segmento A (TED / PIX Transferência / crédito em conta).
+ *
+ * PIX Transferência (forma 45): câmara SPI 009 + identificação transferência 04 (chave).
  *
  * @see sispag_cnab_itau_B341.txt — REGISTRO DETALHE SEGMENTO A
  */
@@ -199,9 +201,50 @@ class Registro3A extends Generico3 {
         }
     }
 
+    protected function set_codigo_camara($value) {
+        if ($this->isPixChave()) {
+            $explicit = $this->entryData['codigo_camara'] ?? null;
+            $this->data['codigo_camara'] = ($explicit !== null && $explicit !== '')
+                ? $explicit
+                : '009';
+            return;
+        }
+
+        if ($value !== '' && $value !== null) {
+            $this->data['codigo_camara'] = $value;
+            return;
+        }
+
+        $this->data['codigo_camara'] = $this->entryData['codigo_camara'] ?? $this->meta['codigo_camara']['default'];
+    }
+
+    protected function set_identificacao_transferencia($value) {
+        if ($this->isPixChave()) {
+            $explicit = $this->entryData['identificacao_transferencia'] ?? null;
+            $this->data['identificacao_transferencia'] = ($explicit !== null && trim((string) $explicit) !== '')
+                ? $explicit
+                : '04';
+            return;
+        }
+
+        if ($value !== '' && $value !== null && trim((string) $value) !== '') {
+            $this->data['identificacao_transferencia'] = $value;
+            return;
+        }
+
+        $this->data['identificacao_transferencia'] = $this->entryData['identificacao_transferencia']
+            ?? $this->meta['identificacao_transferencia']['default'];
+    }
+
     protected function set_agencia_conta_favorecido($value) {
         if ($value !== '' && $value !== null) {
             $this->data['agencia_conta_favorecido'] = $value;
+            return;
+        }
+
+        if ($this->isPixChave()) {
+            // Modelo chave: conta do favorecido não é usada; preencher com brancos/zeros.
+            $this->data['agencia_conta_favorecido'] = str_repeat('0', 5) . ' ' . str_repeat('0', 12) . '  ';
             return;
         }
 
@@ -236,12 +279,40 @@ class Registro3A extends Generico3 {
     }
 
     protected function set_codigo_banco_favorecido($value) {
-        $this->data['codigo_banco_favorecido'] = $value !== '' ? $value : ($this->entryData['banco_favorecido'] ?? '');
+        if ($value !== '' && $value !== null) {
+            $this->data['codigo_banco_favorecido'] = $value;
+            return;
+        }
+
+        if ($this->isPixChave()) {
+            $this->data['codigo_banco_favorecido'] = $this->entryData['banco_favorecido'] ?? '000';
+            return;
+        }
+
+        $this->data['codigo_banco_favorecido'] = $this->entryData['banco_favorecido'] ?? '';
+    }
+
+    private function isPixChave(): bool {
+        $data = $this->entryData;
+
+        if (!empty($data['pix']) || !empty($data['chave_pix']) || !empty($data['pix_chave'])) {
+            return true;
+        }
+
+        $camara = (string) ($data['codigo_camara'] ?? '');
+        $ident = (string) ($data['identificacao_transferencia'] ?? '');
+
+        return $camara === '009' || $ident === '04';
     }
 
     private function shouldIncludeSegmentoB($data): bool {
         if (isset($data['incluir_segmento_b'])) {
             return (bool) $data['incluir_segmento_b'];
+        }
+
+        if ($this->isPixChave()) {
+            $chave = $data['chave_pix'] ?? $data['pix_chave'] ?? '';
+            return $chave !== '' && $chave !== null;
         }
 
         $documento = $data['documento_favorecido'] ?? $data['numero_inscricao_favorecido'] ?? '';
@@ -250,7 +321,10 @@ class Registro3A extends Generico3 {
     }
 
     private function inserirSegmentoB(array $data): void {
-        $class = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout . '\Registro3B';
+        $ns = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout;
+        $class = $this->isPixChave()
+            ? $ns . '\Registro3BPix'
+            : $ns . '\Registro3B';
         $this->children[] = new $class($data);
     }
 
