@@ -63,8 +63,18 @@ abstract class RegistroRemAbstract extends RegistroAbstract {
             if (($value == "" || $value === NULL) && $metaData['default'] != "") {
                 $this->data[$prop] = $metaData['default'];
             } else {
-                // atribui o valor da propriedade
-                $this->data[$prop] = $value;
+                // SUS-4117: campos int/digitos longos devem permanecer string (não float).
+                $tipo = $metaData['tipo'] ?? null;
+                if (($tipo === 'int' || $tipo === 'digitos') && is_string($value)) {
+                    $this->data[$prop] = preg_replace('/\D/', '', $value);
+                } elseif (($tipo === 'int' || $tipo === 'digitos') && (is_int($value) || is_float($value))) {
+                    // Contadores/códigos curtos: int ok; float longo já é perda — cast string sem number_format
+                    $this->data[$prop] = is_int($value)
+                        ? (string) $value
+                        : preg_replace('/\D/', '', (string) $value);
+                } else {
+                    $this->data[$prop] = $value;
+                }
             }
         }
     }
@@ -108,7 +118,23 @@ abstract class RegistroRemAbstract extends RegistroAbstract {
                     $retorno = (($this->data[$prop] && trim($this->data[$prop]) !== "" ? number_format($this->data[$prop], $metaData['precision'], '', '') : (isset($metaData['default']) ? $metaData['default'] : '')));
                     return str_pad($retorno, $metaData['tamanho'] + $metaData['precision'], '0', STR_PAD_LEFT);
                 case 'int':
-                    $retorno = (isset($this->data[$prop]) && trim($this->data[$prop]) !== "" ? number_format($this->data[$prop], 0, '', '') : (isset($metaData['default']) ? $metaData['default'] : ''));
+                case 'digitos':
+                    // Digitos longos (ex.: campo livre 25 do boleto) NÃO podem passar por
+                    // number_format()/float — IEEE-754 corrompe a partir de ~15 dígitos (SUS-4117).
+                    if (isset($this->data[$prop]) && trim((string) $this->data[$prop]) !== '') {
+                        $value = $this->data[$prop];
+                        if (is_float($value)) {
+                            // Já tipado float = dados já perdidos; evitar number_format (mesma falha).
+                            $retorno = preg_replace('/\D/', '', sprintf('%.0F', $value));
+                        } else {
+                            $retorno = preg_replace('/\D/', '', (string) $value);
+                        }
+                    } else {
+                        $retorno = isset($metaData['default']) ? preg_replace('/\D/', '', (string) $metaData['default']) : '';
+                    }
+                    if ($retorno === '') {
+                        $retorno = '0';
+                    }
                     return str_pad($retorno, $metaData['tamanho'], '0', STR_PAD_LEFT);
                 case 'alfa':
                     $retorno = (isset($this->data[$prop])) ? $this->prepareText($this->data[$prop]) : '';

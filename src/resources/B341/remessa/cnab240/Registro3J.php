@@ -53,37 +53,38 @@ class Registro3J extends Generico3 {
         'codigo_barras_banco' => [
             'tamanho' => 3,
             'default' => '',
-            'tipo' => 'int',
+            'tipo' => 'digitos',
             'required' => true,
         ],
         'codigo_barras_moeda' => [
             'tamanho' => 1,
             'default' => '9',
-            'tipo' => 'int',
+            'tipo' => 'digitos',
             'required' => true,
         ],
         'codigo_barras_dv' => [
             'tamanho' => 1,
             'default' => '0',
-            'tipo' => 'int',
+            'tipo' => 'digitos',
             'required' => true,
         ],
         'codigo_barras_vencimento' => [
             'tamanho' => 4,
             'default' => '0',
-            'tipo' => 'int',
+            'tipo' => 'digitos',
             'required' => true,
         ],
         'codigo_barras_valor' => [
             'tamanho' => 10,
             'default' => '0',
-            'tipo' => 'int',
+            'tipo' => 'digitos',
             'required' => true,
         ],
         'codigo_barras_campo_livre' => [
             'tamanho' => 25,
             'default' => '0',
-            'tipo' => 'int',
+            // digitos: serialização segura sem float (SUS-4117)
+            'tipo' => 'digitos',
             'required' => true,
         ],
         'nome_favorecido' => [

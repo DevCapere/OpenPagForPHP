@@ -169,6 +169,8 @@ class RemessaB341Test extends TestCase {
         $segmentoJ = $linhas[2];
         $this->assertSame('J', substr($segmentoJ, 13, 1));
         $this->assertSame('341', substr($segmentoJ, 17, 3));
+        // Posições 18–61 (0-based 17–60): 44 dígitos do código de barras intactos
+        $this->assertSame($codigoBarras, substr($segmentoJ, 17, 44));
         $this->assertStringContainsString('CEDENTE BOLETO LTDA', $segmentoJ);
 
         $segmentoJ52 = $linhas[3];
@@ -178,6 +180,47 @@ class RemessaB341Test extends TestCase {
         $trailerLote = $linhas[4];
         $this->assertSame('5', substr($trailerLote, 7, 1));
         $this->assertSame('000004', substr($trailerLote, 17, 6));
+    }
+
+    /**
+     * SUS-4117 — campo livre 25 dígitos não pode passar por float/number_format.
+     * Prova do bug: number_format('1234567890123456789012345') ≠ input.
+     */
+    public function testRemessaBoletoCampoLivreNaoCorrompePorFloat(): void {
+        $campoLivre = '1234567890123456789012345';
+        $this->assertNotSame(
+            $campoLivre,
+            number_format($campoLivre, 0, '', ''),
+            'Pré-condição: number_format corrompe 25 dígitos (float IEEE-754)'
+        );
+
+        // 341 + 9 + DAC + fator + valor(10) + campo_livre(25) = 44
+        $codigoBarras = '3419' . '7' . '1528' . '0000035288' . $campoLivre;
+        $this->assertSame(44, strlen($codigoBarras));
+
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '30',
+            'versao_layout'   => '030',
+        ]);
+
+        $lote->inserirBoleto([
+            'codigo_barras'   => $codigoBarras,
+            'nome_favorecido' => 'LAMPEIRO',
+            'data_vencimento' => '2026-08-03',
+            'data_pagamento'  => '2026-08-03',
+            'valor_pagamento' => 352.88,
+            'documento_id'    => 'FELIX-001',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $segmentoJ = $linhas[2];
+
+        $this->assertSame('J', substr($segmentoJ, 13, 1));
+        $this->assertSame($codigoBarras, substr($segmentoJ, 17, 44));
+        $this->assertSame($campoLivre, substr($segmentoJ, 36, 25));
+        $this->assertSame('0000035288', substr($segmentoJ, 26, 10));
     }
 
     public function testRemessaMultiLoteTedTedEBoleto(): void {
