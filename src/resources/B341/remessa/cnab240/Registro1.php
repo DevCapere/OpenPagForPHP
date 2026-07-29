@@ -216,6 +216,23 @@ class Registro1 extends Generico1 {
         $this->children[] = new $class($data);
     }
 
+    /**
+     * Valor a somar no trailer (pos. 024-041 — TOTAL VALOR PAGTOS).
+     *
+     * TED/PIX (A): `valor` · Boleto (J): `valor_pagamento` (não `valor`).
+     * Sem isso o trailer sai 0,00 e o Itaú rejeita: "VALOR CALCULADO DIFERENTE DO INFORMADO (0,00)".
+     */
+    private function valorPagamentoDetalhe($child): float {
+        foreach (['valor_pagamento', 'valor', 'vlr_pagamento', 'vlr_nominal', 'valor_titulo'] as $campo) {
+            $raw = $child->getUnformated($campo);
+            if ($raw !== null && $raw !== '' && $raw !== '0' && $raw !== 0 && $raw !== 0.0) {
+                return (float) $raw;
+            }
+        }
+
+        return 0.0;
+    }
+
     public function getText() {
         $loteSalvo = RemessaAbstract::$loteCounter;
         RemessaAbstract::$loteCounter = (int) $this->data['codigo_lote'];
@@ -236,11 +253,11 @@ class Registro1 extends Generico1 {
         $valorTotal = 0.0;
 
         foreach ($this->children as $child) {
-            $valor = $child->getUnformated('valor')
-                ?? $child->getUnformated('vlr_pagamento')
-                ?? $child->getUnformated('vlr_nominal')
-                ?? 0;
-            $valorTotal += (float) $valor;
+            // Nota 17: soma só inclusão (000/001/002/003). Complementos (J-52) não são children do lote.
+            $tipoMovimento = (string) ($child->getUnformated('tipo_movimento') ?? '000');
+            if (in_array($tipoMovimento, ['000', '001', '002', '003'], true)) {
+                $valorTotal += $this->valorPagamentoDetalhe($child);
+            }
             $child->getText();
         }
 

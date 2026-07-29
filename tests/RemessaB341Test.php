@@ -205,6 +205,8 @@ class RemessaB341Test extends TestCase {
         $trailerLote = $linhas[4];
         $this->assertSame('5', substr($trailerLote, 7, 1));
         $this->assertSame('000004', substr($trailerLote, 17, 6));
+        // TOTAL VALOR PAGTOS (024-041) = soma valor_pagamento do Segmento J — não zeros
+        $this->assertSame('000000000000250000', substr($trailerLote, 23, 18));
     }
 
     /**
@@ -246,6 +248,13 @@ class RemessaB341Test extends TestCase {
         $this->assertSame($codigoBarras, substr($segmentoJ, 17, 44));
         $this->assertSame($campoLivre, substr($segmentoJ, 36, 25));
         $this->assertSame('0000035288', substr($segmentoJ, 26, 10));
+
+        // Retorno Itaú 29/07/2026 Felix: "VALOR CALCULADO DIFERENTE DO INFORMADO (0,00)"
+        // Trailer lote informava zeros; deve espelhar R$ 352,88 do Segmento J.
+        $trailerLote = $linhas[4];
+        $this->assertSame('5', substr($trailerLote, 7, 1));
+        $this->assertSame('000004', substr($trailerLote, 17, 6));
+        $this->assertSame('000000000000035288', substr($trailerLote, 23, 18));
     }
 
     public function testRemessaMultiLoteTedTedEBoleto(): void {
