@@ -136,6 +136,16 @@ class Generico1 extends RegistroRemAbstract
         return $this->counter;
     }
 
+    /**
+     * Incrementa o contador de detalhes sem retornar o valor.
+     * Usado por complementos (ex.: J-52) que reutilizam o nº do segmento pai (Nota 9 SISPAG)
+     * mas ainda precisam ser contabilizados no trailer do lote.
+     */
+    public function bump_counter(): void
+    {
+        $this->counter++;
+    }
+
     public function inserirDetalhe($data)
     {
         $class = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout . '\Registro3P';

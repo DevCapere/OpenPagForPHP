@@ -266,6 +266,8 @@ class Registro3J extends Generico3 {
     }
 
     private function inserirSegmentoJ52(array $data): void {
+        // Nota 9 SISPAG: J-52 / B / C reutilizam o mesmo Nº SEQUENCIAL do Segmento J.
+        $data['numero_registro_pai'] = $this->data['numero_registro'] ?? null;
         $class = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout . '\Registro3J52';
         $this->children[] = new $class($data);
     }
