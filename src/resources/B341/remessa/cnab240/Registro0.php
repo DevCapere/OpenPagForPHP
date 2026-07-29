@@ -126,12 +126,15 @@ class Registro0 extends Generico0 {
             'tipo' => 'int',
             'required' => true,
         ],
+        // SisPag layout 080: pos. 158-166 = ZEROS (complemento). Não há NSA no header de arquivo.
+        // Sequencial da remessa Capere fica no nome do .rem / seq_remessa — não neste campo.
         'zeros1' => [
             'tamanho' => 9,
             'default' => '0',
             'tipo' => 'int',
             'required' => true,
         ],
+        // Nota 2: teleprocessamento → zeros.
         'densidade_gravacao' => [
             'tamanho' => 5,
             'default' => '0',

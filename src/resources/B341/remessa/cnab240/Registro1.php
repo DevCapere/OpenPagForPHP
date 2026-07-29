@@ -80,6 +80,7 @@ class Registro1 extends Generico1 {
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
+            // Boleto (030): com filler2 forma BRANCOS 033-052. TED (040): Nota 13 / opcional "1707".
         ],
         'filler2' => [
             'tamanho' => 16,
@@ -189,17 +190,25 @@ class Registro1 extends Generico1 {
         $this->data['dac'] = $value !== '' ? $value : ($this->entryData['conta_dv'] ?? $this->meta['dac']['default']);
     }
 
+    /**
+     * Pos. 033-036 — Identificação do lançamento no extrato (Nota 13).
+     *
+     * SisPag Itaú:
+     * - Lote de **boleto** (layout 030): pos. 033-052 são BRANCOS (manual p.24) — não usar código empresa.
+     * - Lote TED/crédito (layout 040): campo X(04); brancos se não houver acerto (Nota 13).
+     *   Uso especial: "1707" para histórico variável de salários (tipo 30).
+     *
+     * `codigo_empresa_banco` / `num_empresa_banco` **não** entram neste campo —
+     * a empresa no arquivo identifica-se por CNPJ + agência/conta (Nota 1).
+     */
     protected function set_identificacao_lancamento($value) {
-        if ($value !== '' && $value !== null) {
-            $this->data['identificacao_lancamento'] = $value;
+        $trimmed = trim((string) ($value ?? ''));
+        if ($trimmed !== '') {
+            $this->data['identificacao_lancamento'] = substr($trimmed, 0, 4);
             return;
         }
 
-        $codigoEmpresa = RemessaAbstract::$entryData['codigo_empresa_banco']
-            ?? RemessaAbstract::$entryData['codigo_beneficiario']
-            ?? '';
-
-        $this->data['identificacao_lancamento'] = substr((string) $codigoEmpresa, 0, 4);
+        $this->data['identificacao_lancamento'] = str_repeat(' ', 4);
     }
 
     public function inserirBoleto($data) {

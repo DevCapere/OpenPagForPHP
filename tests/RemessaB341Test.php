@@ -86,6 +86,28 @@ class RemessaB341Test extends TestCase {
 
         $this->assertSame('31', substr($headerLote, 11, 2));
         $this->assertSame('030', substr($headerLote, 13, 3));
+        // Manual layout 030: pos. 033-052 = BRANCOS (não identificacao/num_empresa).
+        $this->assertSame(str_repeat(' ', 20), substr($headerLote, 32, 20));
+    }
+
+    public function testHeaderArquivoSemNsaSisPag080(): void {
+        $remessa = new Remessa('341', 'cnab240', array_merge($this->headerData(), [
+            'codigo_empresa_banco'      => '203531',
+            'numero_sequencial_arquivo' => 99,
+        ]));
+        $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '31',
+            'versao_layout'   => '030',
+        ]);
+
+        $headerArquivo = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[0];
+
+        // Manual layout 080: pos. 158-166 = ZEROS (sem NSA). Seq Capere não vai aqui.
+        $this->assertSame('000000000', substr($headerArquivo, 157, 9));
+        // Código empresa no entryData não deve vazar para o header lote 033-036.
+        $headerLote = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[1];
+        $this->assertSame(str_repeat(' ', 20), substr($headerLote, 32, 20));
     }
 
     public function testRemessaTedComSegmentosAB(): void {
