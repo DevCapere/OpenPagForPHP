@@ -198,9 +198,9 @@ class RemessaB341Test extends TestCase {
         $segmentoJ52 = $linhas[3];
         $this->assertSame('J', substr($segmentoJ52, 13, 1));
         $this->assertSame('52', substr($segmentoJ52, 17, 2));
-        // Nota 9 SISPAG: J-52 reutiliza o mesmo Nº SEQUENCIAL do Segmento J
-        $this->assertSame(substr($segmentoJ, 8, 5), substr($segmentoJ52, 8, 5));
+        // Produção/portal Itaú: J-52 sobe o sequencial (J=00001, J-52=00002) — arquivo aceito cliente
         $this->assertSame('00001', substr($segmentoJ, 8, 5));
+        $this->assertSame('00002', substr($segmentoJ52, 8, 5));
 
         $trailerLote = $linhas[4];
         $this->assertSame('5', substr($trailerLote, 7, 1));

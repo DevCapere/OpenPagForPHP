@@ -9,29 +9,12 @@ use PagForPHP\resources\generico\remessa\cnab240\Generico3;
  * SISPAG Itaú — Segmento J-52 (sacado/cedente/sacador do boleto).
  *
  * @see sispag_cnab_itau_B341.txt — REGISTRO DETALHE SEGMENTO J-52
- * Nota 9: mesmo número sequencial do Segmento J correspondente.
+ *
+ * Sequencial (009-013): incremental no lote (J=00001, J-52=00002), como nas remessas
+ * aceitas em produção/portal Itaú. A Nota 9 do manual pede reutilizar o nº do J, mas
+ * arquivos reais (ex.: forma 31) e o validador usam sequência contínua — SUS-4117.
  */
 class Registro3J52 extends Generico3 {
-
-    /**
-     * Reutiliza o nº do Segmento J (Nota 9) e ainda contabiliza o detalhe no trailer.
-     */
-    protected function set_numero_registro($value)
-    {
-        $pai = $this->entryData['numero_registro_pai'] ?? null;
-        if ($pai !== null && $pai !== '' && $pai !== '0') {
-            $this->data['numero_registro'] = $pai;
-            $lote = RemessaAbstract::getLote(RemessaAbstract::$loteCounter);
-            if ($lote !== null && method_exists($lote, 'bump_counter')) {
-                $lote->bump_counter();
-            }
-
-            return;
-        }
-
-        parent::set_numero_registro($value);
-    }
-
 
     protected $meta = [
         'codigo_banco' => [
