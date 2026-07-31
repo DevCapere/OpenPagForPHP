@@ -117,7 +117,40 @@ class Registro3BPix extends Generico3 {
             ? $value
             : ($this->entryData['chave_pix'] ?? $this->entryData['pix_chave'] ?? '');
 
-        $this->data['chave_pix'] = (string) $chave;
+        // SisPag Itaú: telefone (01) e CPF/CNPJ (03) só com dígitos — defesa na lib.
+        $this->data['chave_pix'] = $this->normalizarChavePixPorTipo(
+            (string) $chave,
+            (string) ($this->data['tipo_chave_pix'] ?? $this->entryData['tipo_chave_pix'] ?? '')
+        );
+    }
+
+    /**
+     * Remove máscara de CPF/CNPJ/telefone; e-mail (02) e aleatória (04) preservam o texto.
+     * Também trata chave com máscara de documento mesmo se o tipo vier inconsistente.
+     */
+    private function normalizarChavePixPorTipo(string $chave, string $tipoChave): string {
+        $chave = trim($chave);
+        $tipo = str_pad(trim($tipoChave), 2, '0', STR_PAD_LEFT);
+
+        if (in_array($tipo, ['01', '03'], true)) {
+            return preg_replace('/\D/', '', $chave) ?? '';
+        }
+
+        if ($this->chavePareceDocumentoComMascara($chave)) {
+            return preg_replace('/\D/', '', $chave) ?? '';
+        }
+
+        return $chave;
+    }
+
+    private function chavePareceDocumentoComMascara(string $chave): bool {
+        if ($chave === '' || !preg_match('/^[\d.\-\/\s]+$/', $chave)) {
+            return false;
+        }
+
+        $digits = preg_replace('/\D/', '', $chave) ?? '';
+
+        return strlen($digits) === 11 || strlen($digits) === 14;
     }
 
     protected function set_tipo_inscricao_favorecido($value) {

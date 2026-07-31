@@ -405,7 +405,11 @@ class RemessaB341Test extends TestCase {
         $segmentoB = $linhas[3];
 
         $this->assertSame($tipoChave, substr($segmentoB, 14, 2));
-        $this->assertStringContainsString(strtoupper($chave), strtoupper($segmentoB));
+
+        $chaveEsperada = in_array($tipoChave, ['01', '03'], true)
+            ? (preg_replace('/\D/', '', $chave) ?? '')
+            : $chave;
+        $this->assertStringContainsString(strtoupper($chaveEsperada), strtoupper($segmentoB));
     }
 
     public static function providerChavesPix(): array {
@@ -416,6 +420,32 @@ class RemessaB341Test extends TestCase {
             'cnpj'      => ['03', '12345678000199'],
             'aleatoria' => ['04', '123e4567-e89b-12d3-a456-426614174000'],
         ];
+    }
+
+    public function testRemessaPixCpfComMascaraRemovePontuacaoNoSegmentoB(): void {
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '45',
+            'versao_layout'   => '040',
+        ]);
+
+        $lote->inserirTransferencia([
+            'nome_favorecido'      => 'MILENA FUNARI',
+            'documento_favorecido' => '03026723037',
+            'documento_id'         => '9908',
+            'data_pagamento'       => '2026-07-31',
+            'valor'                => 1.00,
+            'chave_pix'            => '030.267.230-37',
+            'tipo_chave_pix'       => '03',
+        ]);
+
+        $segmentoB = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[3];
+        $chaveNoArquivo = rtrim(substr($segmentoB, 127, 100));
+
+        $this->assertSame('03', substr($segmentoB, 14, 2));
+        $this->assertSame('03026723037', $chaveNoArquivo);
+        $this->assertStringNotContainsString('030.267.230-37', $segmentoB);
     }
 
 }
