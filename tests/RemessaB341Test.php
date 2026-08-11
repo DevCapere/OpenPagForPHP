@@ -448,4 +448,192 @@ class RemessaB341Test extends TestCase {
         $this->assertStringNotContainsString('030.267.230-37', $segmentoB);
     }
 
+    /**
+     * SUS-4127 — forma 47: J + J-52 PIX (QR estático = chave sem TXID).
+     */
+    public function testRemessaPixQrEstaticoComChave(): void {
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '47',
+            'versao_layout'   => '030',
+        ]);
+
+        $lote->inserirPixQr([
+            'nome_favorecido'      => 'FORNECEDOR QR LTDA',
+            'documento_favorecido' => '11222333000181',
+            'documento_id'         => 'QR-EST-001',
+            'data_vencimento'      => '2026-08-15',
+            'data_pagamento'       => '2026-08-11',
+            'valor_pagamento'      => 150.25,
+            'chave_pagamento'      => 'fornecedor.qr@exemplo.com.br',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+
+        $this->assertCount(6, $linhas);
+        foreach ($linhas as $linha) {
+            $this->assertSame(240, strlen($linha));
+        }
+
+        $headerLote = $linhas[1];
+        $this->assertSame('47', substr($headerLote, 11, 2));
+        $this->assertSame('030', substr($headerLote, 13, 3));
+
+        $segmentoJ = $linhas[2];
+        $this->assertSame('J', substr($segmentoJ, 13, 1));
+        $this->assertSame('00001', substr($segmentoJ, 8, 5));
+        // Nota 18: barras zeradas no QR
+        $this->assertSame(str_repeat('0', 44), substr($segmentoJ, 17, 44));
+        $this->assertSame('000000000015025', substr($segmentoJ, 152, 15)); // valor pagamento 150.25
+
+        $segmentoJ52 = $linhas[3];
+        $this->assertSame('J', substr($segmentoJ52, 13, 1));
+        $this->assertSame('52', substr($segmentoJ52, 17, 2));
+        $this->assertSame('00002', substr($segmentoJ52, 8, 5));
+        $chaveNoArquivo = rtrim(substr($segmentoJ52, 131, 77));
+        $txidNoArquivo = rtrim(substr($segmentoJ52, 208, 32));
+        $this->assertSame('fornecedor.qr@exemplo.com.br', $chaveNoArquivo);
+        $this->assertSame('', $txidNoArquivo);
+
+        $trailerLote = $linhas[4];
+        $this->assertSame('000004', substr($trailerLote, 17, 6));
+        $this->assertSame('000000000000015025', substr($trailerLote, 23, 18));
+    }
+
+    /**
+     * SUS-4127 — QR dinâmico: URL sem https + TXID (Notas 41/38).
+     */
+    public function testRemessaPixQrDinamicoUrlSemHttpsETxid(): void {
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '47',
+            'versao_layout'   => '030',
+        ]);
+
+        $lote->inserirPixQr([
+            'nome_favorecido'      => 'RECEBEDOR DINAMICO',
+            'documento_favorecido' => '12345678901',
+            'documento_id'         => 'QR-DIN-001',
+            'data_pagamento'       => '2026-08-11',
+            'valor'                => 99.90,
+            'chave_pagamento'      => 'https://qr.example.com/pix/abc123',
+            'txid'                 => 'TXIDDINAMICO001ABCDEFGHIJKLMN',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $segmentoJ52 = $linhas[3];
+
+        $chaveNoArquivo = rtrim(substr($segmentoJ52, 131, 77));
+        $txidNoArquivo = rtrim(substr($segmentoJ52, 208, 32));
+
+        $this->assertSame('qr.example.com/pix/abc123', $chaveNoArquivo);
+        $this->assertStringNotContainsString('https://', $chaveNoArquivo);
+        $this->assertSame('TXIDDINAMICO001ABCDEFGHIJKLMN', $txidNoArquivo);
+
+        $segmentoJ = $linhas[2];
+        $this->assertSame(str_repeat('0', 44), substr($segmentoJ, 17, 44));
+        $this->assertSame('000000000009990', substr($segmentoJ, 152, 15));
+    }
+
+    public function testNormalizarChavePagamentoRemoveHttps(): void {
+        $this->assertSame(
+            'pix.itau.com.br/qr/v2/abc',
+            \PagForPHP\resources\B341\remessa\cnab240\Registro3J52Pix::normalizarChavePagamento(
+                'https://pix.itau.com.br/qr/v2/abc'
+            )
+        );
+        $this->assertSame(
+            'pix.itau.com.br/qr/v2/abc',
+            \PagForPHP\resources\B341\remessa\cnab240\Registro3J52Pix::normalizarChavePagamento(
+                'HTTP://pix.itau.com.br/qr/v2/abc'
+            )
+        );
+        $this->assertSame(
+            '03026723037',
+            \PagForPHP\resources\B341\remessa\cnab240\Registro3J52Pix::normalizarChavePagamento('03026723037')
+        );
+    }
+
+    /**
+     * SUS-4127 / SUS-4230 — forma 13: Segmento O com óptico 44 (linha 48 é convertida).
+     */
+    public function testRemessaConcessionariaSegmentoOForma13(): void {
+        $linha48 = '858300005299088103852623320716262189498928313022';
+        $optico44 = '85830000529088103852623207162621849892831302';
+        $this->assertSame(48, strlen($linha48));
+        $this->assertSame(44, strlen($optico44));
+
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '13',
+            'versao_layout'   => '030',
+        ]);
+
+        $lote->inserirConcessionaria([
+            'codigo_barras'        => $linha48,
+            'nome_concessionaria'  => 'RECEITA FEDERAL INSS',
+            'data_vencimento'      => '2026-08-19',
+            'data_pagamento'       => '2026-08-19',
+            'valor_a_pagar'        => 52908.81,
+            'documento_id'         => '10291',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+
+        $this->assertCount(5, $linhas);
+        foreach ($linhas as $linha) {
+            $this->assertSame(240, strlen($linha));
+        }
+
+        $headerLote = $linhas[1];
+        $this->assertSame('13', substr($headerLote, 11, 2));
+        $this->assertSame('030', substr($headerLote, 13, 3));
+
+        $segmentoO = $linhas[2];
+        $this->assertSame('O', substr($segmentoO, 13, 1));
+        $this->assertSame('00001', substr($segmentoO, 8, 5));
+        // Linha 48 → óptico 44 + pad (Itaú rejeita linha com DV campo mod11 / id 8)
+        $this->assertSame($optico44 . '    ', substr($segmentoO, 17, 48));
+        $this->assertSame('REA', substr($segmentoO, 103, 3));
+        $this->assertSame('000000005290881', substr($segmentoO, 121, 15)); // valor a pagar 52908.81
+
+        $trailerLote = $linhas[3];
+        $this->assertSame('5', substr($trailerLote, 7, 1));
+        $this->assertSame('000003', substr($trailerLote, 17, 6)); // header + O + trailer
+        $this->assertSame('000000000005290881', substr($trailerLote, 23, 18));
+    }
+
+    public function testRemessaConcessionariaAceitaBarras44PadDireita(): void {
+        $barras44 = '85830000529088103852623207162621849892831302';
+        $this->assertSame(44, strlen($barras44));
+
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '13',
+            'versao_layout'   => '030',
+        ]);
+        $lote->inserirConcessionaria([
+            'codigo_barras'   => $barras44,
+            'nome_favorecido' => 'CONCESSIONARIA X',
+            'data_pagamento'  => '2026-08-11',
+            'valor'           => 10.00,
+            'documento_id'    => 'UT-44',
+        ]);
+
+        $segmentoO = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[2];
+        $campoBarras = substr($segmentoO, 17, 48);
+        $this->assertSame($barras44 . '    ', $campoBarras);
+    }
+
+    public function testNormalizarCodigoBarrasArrecadacaoRejeita45(): void {
+        $this->expectException(\Exception::class);
+        \PagForPHP\resources\B341\remessa\cnab240\Registro3O::normalizarCodigoBarrasArrecadacao(
+            '858300005290881038526232071626218498928313022' // 45 — bug Capere 10291
+        );
+    }
+
 }

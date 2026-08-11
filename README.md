@@ -52,6 +52,27 @@ Defesa na lib: se a chave parecer CPF/CNPJ mascarado e o tipo vier inconsistente
 
 Relacionado Capere: **RN-36 / RN-36b** (`ItauCnabRemessaService`) — mesma regra na origem da remessa.
 
+## PIX QR-CODE (Itaú SisPag — forma 47)
+
+Segmento **J** + **J-52 PIX** (`Registro3J52Pix`) — não reutilizar J-52 de boleto.
+
+| Campo (J-52 PIX) | Pos. | Conteúdo |
+|------------------|------|----------|
+| Chave de pagamento | 132–208 | QR estático: chave PIX · dinâmico: URL **sem** `https://` (Nota 41) |
+| TXID | 209–240 | Identificador do QR (Nota 38; obrigatório no dinâmico) |
+
+No Segmento J, campos de “código de barras” vão **zerados** (Nota 18). Hook: `$lote->inserirPixQr([...])`.
+
+Relacionado Capere: **SUS-4127** / RN-4127-*.
+
+## Concessionárias / arrecadação (Itaú SisPag — forma 13)
+
+Segmento **O** (`Registro3O`) — código de barras **X(48)** = óptico FEBRABAN **44** + 4 espaços (linha 48 é convertida; início `8`).
+
+Hook: `$lote->inserirConcessionaria([...])` com `forma_pagamento => '13'`, `versao_layout => '030'`.
+
+Relacionado Capere: **SUS-4127** / **SUS-4230** / RN-4127-4.
+
 ## Licença
 
 * MIT License
