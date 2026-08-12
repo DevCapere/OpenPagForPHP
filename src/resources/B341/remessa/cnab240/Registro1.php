@@ -217,13 +217,37 @@ class Registro1 extends Generico1 {
     }
 
     /**
+     * PIX QR-CODE (forma 47) — Segmento J + J-52 PIX (chave/URL + TXID).
+     *
+     * @see Registro3J52Pix
+     * @see SUS-4127
+     */
+    public function inserirPixQr($data) {
+        $data = is_array($data) ? $data : [];
+        $data['pix_qr'] = true;
+        $class = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout . '\Registro3J';
+        $this->children[] = new $class($data);
+    }
+
+    /**
+     * Concessionárias / tributos com código de barras (forma 13) — Segmento O.
+     *
+     * @see Registro3O
+     * @see SUS-4127 / SUS-4230
+     */
+    public function inserirConcessionaria($data) {
+        $class = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout . '\Registro3O';
+        $this->children[] = new $class($data);
+    }
+
+    /**
      * Valor a somar no trailer (pos. 024-041 — TOTAL VALOR PAGTOS).
      *
-     * TED/PIX (A): `valor` · Boleto (J): `valor_pagamento` (não `valor`).
+     * TED/PIX chave (A): `valor` · Boleto/PIX QR (J): `valor_pagamento` · O: `valor_a_pagar`.
      * Sem isso o trailer sai 0,00 e o Itaú rejeita: "VALOR CALCULADO DIFERENTE DO INFORMADO (0,00)".
      */
     private function valorPagamentoDetalhe($child): float {
-        foreach (['valor_pagamento', 'valor', 'vlr_pagamento', 'vlr_nominal', 'valor_titulo'] as $campo) {
+        foreach (['valor_a_pagar', 'valor_pagamento', 'valor', 'vlr_pagamento', 'vlr_nominal', 'valor_titulo'] as $campo) {
             $raw = $child->getUnformated($campo);
             if ($raw !== null && $raw !== '' && $raw !== '0' && $raw !== 0 && $raw !== 0.0) {
                 return (float) $raw;

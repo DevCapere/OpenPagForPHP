@@ -166,9 +166,33 @@ class Registro3J extends Generico3 {
     ];
 
     public function __construct($data = null) {
-        $data = $this->enriquecerComCodigoBarras($data ?? []);
+        $data = $data ?? [];
+        if (self::isPixQr($data)) {
+            $data = $this->enriquecerPixQrComZeros($data);
+        } else {
+            $data = $this->enriquecerComCodigoBarras($data);
+        }
         parent::__construct($data);
         $this->inserirSegmentoJ52($data);
+    }
+
+    /**
+     * PIX QR-CODE (forma 47): J + J-52 PIX — sem código de barras tradicional.
+     */
+    public static function isPixQr(array $data): bool {
+        if (!empty($data['pix_qr'])) {
+            return true;
+        }
+
+        $forma = (string) ($data['forma_pagamento'] ?? '');
+        if ($forma === '47') {
+            return true;
+        }
+
+        $temChaveQr = ($data['chave_pagamento'] ?? $data['url_pix'] ?? '') !== '';
+        $temBarras = ($data['codigo_barras'] ?? '') !== '' || ($data['linha_digitavel'] ?? '') !== '';
+
+        return $temChaveQr && !$temBarras;
     }
 
     protected function set_valor_pagamento($value) {
@@ -265,10 +289,28 @@ class Registro3J extends Generico3 {
         return substr($codigoBarras, 0, 3) === '341' ? '30' : '31';
     }
 
+    /**
+     * Nota 18: QR Code — zeros em banco/moeda/DV/vencimento/valor/campo livre do “código de barras”.
+     */
+    private function enriquecerPixQrComZeros(array $data): array {
+        return array_merge($data, [
+            'pix_qr'                    => true,
+            'codigo_barras_banco'       => '000',
+            'codigo_barras_moeda'       => '0',
+            'codigo_barras_dv'          => '0',
+            'codigo_barras_vencimento'  => '0000',
+            'codigo_barras_valor'       => '0000000000',
+            'codigo_barras_campo_livre' => str_repeat('0', 25),
+        ]);
+    }
+
     private function inserirSegmentoJ52(array $data): void {
         // Sequencial próprio (00002…): alinhado a remessas aceitas pelo Itaú/portal.
         // Não reutilizar numero_registro do J (Nota 9 no papel ≠ arquivo real — SUS-4117).
-        $class = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout . '\Registro3J52';
+        $ns = 'PagForPHP\resources\\B' . RemessaAbstract::$banco . '\remessa\\' . RemessaAbstract::$layout;
+        $class = self::isPixQr($data)
+            ? $ns . '\Registro3J52Pix'
+            : $ns . '\Registro3J52';
         $this->children[] = new $class($data);
     }
 

@@ -137,6 +137,29 @@ class RetornoB341Test extends TestCase {
         $this->assertEquals('52', $segmentoJ52->codigo_registro);
     }
 
+    public function testParseRetornoUtilidadesSegmentoO(): void {
+        // Evidência prod SUS-4258 — PAG_341_3294_21224_11082607.RET (forma 13 / RJIK)
+        $conteudo = implode("\r\n", [
+            '34100000      080221753338000194          VANNEX    03294 000000021224 0FELIX HOTEIS LTDA             BANCO ITAU S/A                          21108202617584600053408006250                                                                     ',
+            '34100011C2013080 221753338000194                    03294 000000021224 0FELIX HOTEIS LTDA                                                                                   00000                                   00000000                   ',
+            '3410001300001O00085830000529088103852623207162621849892831302    RECEITA FEDERAL COD. 1162 - IN19082026REA00000000000000000000000529088119082026000000005290881               10291                                   0677818989000010RJIK      ',
+            '34100015         000003000000000005290881000000000000000000                                                                                                                            ',
+            '34199999         000001000005000000                                                                                                                                                    ',
+        ]) . "\r\n";
+
+        $retorno = new Retorno($conteudo);
+        $detalhes = $retorno->getRegistros(1);
+
+        $this->assertCount(1, $detalhes);
+        $segmentoO = $detalhes[0];
+        $this->assertSame('O', $segmentoO->codigo_segmento);
+        $this->assertStringStartsWith('858300005290881', (string) $segmentoO->codigo_barras);
+        $this->assertStringContainsString('RECEITA FEDERAL', (string) $segmentoO->nome_concessionaria);
+        $this->assertSame('10291', trim((string) $segmentoO->seu_numero));
+        $this->assertSame('RJIK', trim((string) $segmentoO->ocorrencias));
+        $this->assertEquals(52908.81, (float) $segmentoO->valor_a_pagar);
+    }
+
     public function testTrailerArquivo(): void {
         $retorno = new Retorno($this->remessaTedParaRetorno());
         $raiz = $retorno->getRegistrosRaiz();
