@@ -65,6 +65,9 @@ class Registro1 extends Generico1 {
                 $this->children[] = new ($ns . '\\Registro3B')($linha);
             } elseif (substr($linha, 13, 1) === 'J') {
                 $this->children[] = new ($ns . '\\Registro3J')($linha);
+            } elseif (substr($linha, 13, 1) === 'O') {
+                // SUS-4258 — UTILIDADES / arrecadação (forma 13/91)
+                $this->children[] = new ($ns . '\\Registro3O')($linha);
             } else {
                 RetornoAbstract::$linesCounter++;
             }
