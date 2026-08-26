@@ -257,8 +257,32 @@ class Registro3A extends Generico3 {
     }
 
     protected function set_numero_inscricao_favorecido($value) {
-        $documento = $value !== '' ? $value : ($this->entryData['documento_favorecido'] ?? '0');
-        $this->data['numero_inscricao_favorecido'] = preg_replace('/\D/', '', (string) $documento);
+        $documento = ($value !== '' && $value !== null && $value !== '0' && $value !== 0)
+            ? $value
+            : ($this->entryData['documento_favorecido']
+                ?? $this->entryData['numero_inscricao_favorecido']
+                ?? '0');
+
+        $digits = preg_replace('/\D/', '', (string) $documento) ?: '';
+
+        // RN-36b: chave CPF/CNPJ pode preencher inscrição no A quando titular veio vazio.
+        if ($digits === '' && $this->isPixChave()) {
+            $tipoChave = str_pad(
+                trim((string) ($this->entryData['tipo_chave_pix'] ?? $this->entryData['tipo_chave'] ?? '')),
+                2,
+                '0',
+                STR_PAD_LEFT
+            );
+            if ($tipoChave === '03') {
+                $digits = preg_replace(
+                    '/\D/',
+                    '',
+                    (string) ($this->entryData['chave_pix'] ?? $this->entryData['pix_chave'] ?? '')
+                ) ?: '';
+            }
+        }
+
+        $this->data['numero_inscricao_favorecido'] = $digits !== '' ? $digits : '0';
     }
 
     protected function set_data_pagamento($value) {
