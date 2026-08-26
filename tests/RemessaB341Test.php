@@ -370,6 +370,7 @@ class RemessaB341Test extends TestCase {
         $this->assertSame('A', substr($segmentoA, 13, 1));
         $this->assertSame('009', substr($segmentoA, 17, 3));
         $this->assertSame('04', substr($segmentoA, 112, 2));
+        $this->assertSame('98765432000111', substr($segmentoA, 203, 14));
 
         $segmentoB = $linhas[3];
         $this->assertSame('B', substr($segmentoB, 13, 1));
@@ -420,6 +421,32 @@ class RemessaB341Test extends TestCase {
             'cnpj'      => ['03', '12345678000199'],
             'aleatoria' => ['04', '123e4567-e89b-12d3-a456-426614174000'],
         ];
+    }
+
+    public function testRemessaPixReplicarInscricaoFavorecidoNoSegmentoA(): void {
+        $remessa = new Remessa('341', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '45',
+            'versao_layout'   => '040',
+        ]);
+
+        $lote->inserirTransferencia([
+            'nome_favorecido'      => 'FRIGOBOI COMERCIO DE ALIMENTOS',
+            'documento_favorecido' => '05017924000114',
+            'documento_id'         => '10309',
+            'data_pagamento'       => '2026-08-26',
+            'valor'                => 1249.20,
+            'chave_pix'            => '05017924000114',
+            'tipo_chave_pix'       => '03',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $segmentoA = $linhas[2];
+        $segmentoB = $linhas[3];
+
+        $this->assertSame('05017924000114', substr($segmentoA, 203, 14));
+        $this->assertSame('05017924000114', substr($segmentoB, 18, 14));
     }
 
     public function testRemessaPixCpfComMascaraRemovePontuacaoNoSegmentoB(): void {
