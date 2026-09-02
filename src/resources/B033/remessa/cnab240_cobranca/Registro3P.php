@@ -25,7 +25,7 @@
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace PagForPHP\resources\B033\remessa\cnab240;
+namespace PagForPHP\resources\B033\remessa\cnab240_cobranca;
 
 use PagForPHP\resources\generico\remessa\cnab240\Generico3;
 use PagForPHP\RegistroRemAbstract;
