@@ -23,12 +23,11 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace PagForPHP\resources\B033\remessa\cnab240;
+namespace PagForPHP\resources\B033\remessa\cnab240_cobranca;
 
-use PagForPHP\resources\generico\remessa\cnab240\Generico3;
-use PagForPHP\Exception;
+use PagForPHP\resources\generico\remessa\cnab240\Generico1;
 
-class Registro3Q extends Generico3
+class Registro1 extends Generico1
 {
 
     protected $meta = array(
@@ -46,35 +45,40 @@ class Registro3Q extends Generico3
         ),
         'tipo_registro' => array(
             'tamanho' => 1,
-            'default' => '3',
+            'default' => 1,
             'tipo' => 'int',
             'required' => true
         ),
-        'numero_registro' => array(
-            'tamanho' => 5,
-            'default' => '0',
-            'tipo' => 'int',
-            'required' => true
-        ),
-        'seguimento' => array(
+        'operacao' => array(
             'tamanho' => 1,
-            'default' => 'Q',
+            'default' => 'R',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'filler1' => array(
-            'tamanho' => 1,
-            'default' => ' ',
-            'tipo' => 'alfa',
-            'required' => true
-        ),
-        'codigo_movimento' => array(
+        'tipo_servico' => array(
             'tamanho' => 2,
             'default' => '01',
             'tipo' => 'int',
             'required' => true
         ),
-        // - ------------------ até aqui é igual para todo registro tipo 3
+        'filler1' => array(
+            'tamanho' => 2,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true
+        ),
+        'versao_layout' => array(
+            'tamanho' => 3,
+            'default' => '030',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'filler2' => array(
+            'tamanho' => 1,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true
+        ),
         'tipo_inscricao' => array(
             'tamanho' => 1,
             'default' => '',
@@ -87,86 +91,74 @@ class Registro3Q extends Generico3
             'tipo' => 'int',
             'required' => true
         ),
-        'nome_pagador' => array(
-            'tamanho' => 40,
-            'default' => '',
+        'filler3' => array(
+            'tamanho' => 20,
+            'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'endereco_pagador' => array(
-            'tamanho' => 40,
-            'default' => '',
-            'tipo' => 'alfa',
-            'required' => true
-        ),
-        'bairro_pagador' => array(
-            'tamanho' => 15,
-            'default' => '',
-            'tipo' => 'alfa',
-            'required' => true
-        ),
-        'cep_pagador' => array(
-            'tamanho' => 8,
+        'agencia' => array(
+            'tamanho' => 4,
             'default' => '',
             'tipo' => 'int',
             'required' => true
         ),
-        'cidade_pagador' => array(
-            'tamanho' => 15,
-            'default' => '',
-            'tipo' => 'alfa',
+        'filler12' => array(
+            'tamanho' => 4,
+            'default' => '0',
+            'tipo' => 'int',
             'required' => true
         ),
-        'uf_pagador' => array(
-            'tamanho' => 2,
-            'default' => '',
-            'tipo' => 'alfa',
+        'codigo_beneficiario' => array(
+            'tamanho' => 6,
+            'default' => '0',
+            'tipo' => 'int',
             'required' => true
         ),
-        'tipo_incricao_avalista' => array(
+        'codigo_beneficiario_dv' => array(
             'tamanho' => 1,
             'default' => '0',
             'tipo' => 'int',
             'required' => true
         ),
-        'numero_incricao_avalista' => array(
-            'tamanho' => 15,
-            'default' => '0',
-            'tipo' => 'int',
+        'filler4' => array(
+            'tamanho' => 5,
+            'default' => ' ',
+            'tipo' => 'alfa',
             'required' => true
         ),
-        'nome_avalista' => array(
+        'nome_empresa' => array(
+            'tamanho' => 30,
+            'default' => '',
+            'tipo' => 'alfa',
+            'required' => true
+        ),
+        'mensagem1' => array(// mensagems 1 e 2 : somente use para mensagens que serao impressas de forma identica em todos os boletos do lote
             'tamanho' => 40,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'identificador_carne' => array(
-            'tamanho' => 3,
-            'default' => '0',
+        'mensagem2' => array(// mensagems 1 e 2 : somente use para mensagens que serao impressas de forma identica em todos os boletos do lote
+            'tamanho' => 40,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true
+        ),
+        'numero_remessa' => array(
+            'tamanho' => 8,
+            'default' => '',
             'tipo' => 'int',
             'required' => true
         ),
-        'sequencia_parcela' => array(
-            'tamanho' => 3,
-            'default' => '0',
-            'tipo' => 'int',
+        'data_gravacao' => array(
+            'tamanho' => 8,
+            'default' => '', // nao informar a data na instanciação - gerada dinamicamente
+            'tipo' => 'date',
             'required' => true
         ),
-        'total_parcela' => array(
-            'tamanho' => 3,
-            'default' => '0',
-            'tipo' => 'int',
-            'required' => true
-        ),
-        'numero_plano' => array(
-            'tamanho' => 3,
-            'default' => '0',
-            'tipo' => 'int',
-            'required' => true
-        ),
-        'filler13' => array(
-            'tamanho' => 19,
+        'filler5' => array(
+            'tamanho' => 41,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true

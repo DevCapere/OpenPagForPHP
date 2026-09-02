@@ -23,13 +23,13 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
  * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-namespace PagForPHP\resources\B033\remessa\cnab240;
+namespace PagForPHP\resources\B033\remessa\cnab240_cobranca;
 
-use PagForPHP\resources\generico\remessa\cnab240\Generico3;
-use PagForPHP\Exception;
+use \PagForPHP\resources\generico\remessa\cnab240\Generico0;
 
-class Registro3R extends Generico3
+class Registro0 extends Generico0
 {
+
     protected $meta = array(
         'codigo_banco' => array(
             'tamanho' => 3,
@@ -39,105 +39,114 @@ class Registro3R extends Generico3
         ),
         'codigo_lote' => array(
             'tamanho' => 4,
-            'default' => 1,
+            'default' => '0000',
             'tipo' => 'int',
             'required' => true
         ),
         'tipo_registro' => array(
             'tamanho' => 1,
-            'default' => '3',
-            'tipo' => 'int',
-            'required' => true
-        ),
-        'numero_registro' => array(
-            'tamanho' => 5,
             'default' => '0',
             'tipo' => 'int',
-            'required' => true
-        ),
-        'seguimento' => array(
-            'tamanho' => 1,
-            'default' => 'R',
-            'tipo' => 'alfa',
             'required' => true
         ),
         'filler1' => array(
-            'tamanho' => 1,
+            'tamanho' => 8,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'codigo_movimento' => array(
-            'tamanho' => 2,
-            'default' => '01', // entrada de titulo
+        'tipo_inscricao' => array(
+            'tamanho' => 1,
+            'default' => '',
             'tipo' => 'int',
             'required' => true
         ),
-        // - ------------------ ate aqui é igual para todo registro tipo 3
-        'codigo_desconto2' => array(
+        'numero_inscricao' => array(
+            'tamanho' => 15,
+            'default' => '',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'agencia' => array(
+            'tamanho' => 4,
+            'default' => '',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'filler12' => array(
+            'tamanho' => 4,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'codigo_beneficiario' => array(
+            'tamanho' => 6,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'codigo_beneficiario_dv' => array(
             'tamanho' => 1,
             'default' => '0',
             'tipo' => 'int',
             'required' => true
         ),
-        'data_desconto2' => array(
-            'tamanho' => 8,
-            'default' => '0',
-            'tipo' => 'date',
-            'required' => true
-        ),
-        'vlr_desconto2' => array(
-            'tamanho' => 13,
-            'default' => '0',
-            'tipo' => 'decimal',
-            'precision' => 2,
-            'required' => true
-        ),
-        'filler14' => array(
-            'tamanho' => 24,
+        'filler2' => array(
+            'tamanho' => 25,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'codigo_multa' => array(
-            'tamanho' => 1,
-            'default' => '1',
-            'tipo' => 'int',
+        'nome_empresa' => array(
+            'tamanho' => 30,
+            'default' => '',
+            'tipo' => 'alfa',
             'required' => true
         ),
-        'data_multa' => array(
-            'tamanho' => 8,
-            'default' => '0',
-            'tipo' => 'date',
+        'nome_banco' => array(
+            'tamanho' => 30,
+            'default' => 'BANCO SANTANDER',
+            'tipo' => 'alfa',
             'required' => true
         ),
-        'vlr_multa' => array(
-            'tamanho' => 13,
-            'default' => '0',
-            'tipo' => 'decimal',
-            'precision' => 2,
-            'required' => true
-        ),
-        'filler15' => array(
+        'filler3' => array(
             'tamanho' => 10,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'mensagem3' => array(
-            'tamanho' => 40,
+        'codigo_remessa' => array(
+            'tamanho' => 1,
+            'default' => '1',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'data_geracao' => array(
+            'tamanho' => 8,
+            'default' => '', // nao informar a data na instanciação - gerada dinamicamente
+            'tipo' => 'date',
+            'required' => true
+        ),
+        'filler4' => array(
+            'tamanho' => 6,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
         ),
-        'mensagem4' => array(
-            'tamanho' => 40,
-            'default' => ' ',
-            'tipo' => 'alfa',
+        'numero_sequencial_arquivo' => array(
+            'tamanho' => 6,
+            'default' => '',
+            'tipo' => 'int',
             'required' => true
         ),
-        'filler16' => array(
-            'tamanho' => 61,
+        'versao_layout' => array(
+            'tamanho' => 3,
+            'default' => '040',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        'filler5' => array(
+            'tamanho' => 74,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true
