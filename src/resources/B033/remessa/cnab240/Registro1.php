@@ -213,7 +213,7 @@ class Registro1 extends Generico1 {
         $agencia4 = substr(str_pad($agencia !== '' ? $agencia : '0', 4, '0', STR_PAD_LEFT), -4);
         $convenio12 = str_pad($convenio !== '' ? $convenio : '0', 12, '0', STR_PAD_LEFT);
 
-        $this->data['codigo_convenio'] = str_pad('033', 4, '0', STR_PAD_LEFT) . $agencia4 . $convenio12;
+        $this->data['codigo_convenio'] = str_pad('033', 4, ' ', STR_PAD_RIGHT) . $agencia4 . $convenio12;
     }
 
     public function inserirBoleto($data) {

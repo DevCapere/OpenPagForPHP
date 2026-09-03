@@ -176,8 +176,11 @@ class Registro0 extends Generico0 {
     }
 
     /**
-     * G009 — Código do Convênio: 033 + agência(4) + nº convênio(12).
-     * Aceita `codigo_convenio` pronto ou monta a partir de `codigo_empresa_banco` + agência.
+     * G009 — Código do Convênio (pos. 033-052, X(020)):
+     * BBBBAAAA + CCCCCCCCCCCC
+     * BBBB = banco "033" (4 pos., literal do manual → "033 ")
+     * AAAA = agência sem DV (4)
+     * C…C = nº convênio à direita com zeros à esquerda (12)
      */
     protected function set_codigo_convenio($value) {
         if ($value !== '' && $value !== null && trim((string) $value) !== '') {
@@ -190,7 +193,7 @@ class Registro0 extends Generico0 {
         $agencia4 = substr(str_pad($agencia !== '' ? $agencia : '0', 4, '0', STR_PAD_LEFT), -4);
         $convenio12 = str_pad($convenio !== '' ? $convenio : '0', 12, '0', STR_PAD_LEFT);
 
-        $this->data['codigo_convenio'] = str_pad('033', 4, '0', STR_PAD_LEFT) . $agencia4 . $convenio12;
+        $this->data['codigo_convenio'] = str_pad('033', 4, ' ', STR_PAD_RIGHT) . $agencia4 . $convenio12;
     }
 
     protected function set_numero_sequencial_arquivo($value) {
