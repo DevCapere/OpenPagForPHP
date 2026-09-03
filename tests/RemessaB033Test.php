@@ -107,8 +107,8 @@ class RemessaB033Test extends TestCase {
         // Manual V11.7: NSA 158-163 + versão layout 164-166 = 060
         $this->assertSame('000099', substr($headerArquivo, 157, 6));
         $this->assertSame('060', substr($headerArquivo, 163, 3));
-        // G009 no header arquivo (033 + agência 4 + convênio 12)
-        $this->assertSame('00331234000000203531', substr($headerArquivo, 32, 20));
+        // G009: BBBB="033 " + AAAA(agência) + CCCCCCCCCCCC(convênio)
+        $this->assertSame('033 1234000000203531', substr($headerArquivo, 32, 20));
         // Boleto 030: convênio em branco no header de lote
         $headerLote = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[1];
         $this->assertSame(str_repeat(' ', 20), substr($headerLote, 32, 20));
