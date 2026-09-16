@@ -67,6 +67,8 @@ class RemessaB033Test extends TestCase {
         $this->assertSame('20', substr($headerLote, 9, 2));
         $this->assertSame('41', substr($headerLote, 11, 2));
         $this->assertSame('031', substr($headerLote, 13, 3));
+        $this->assertSame('00331234000000123456', substr($linhas[0], 32, 20), 'G009 header arquivo');
+        $this->assertSame('00331234000000123456', substr($headerLote, 32, 20), 'G009 header lote 031');
 
         $trailer = $linhas[2];
         $this->assertSame('000001', substr($trailer, 17, 6));
@@ -87,8 +89,8 @@ class RemessaB033Test extends TestCase {
 
         $this->assertSame('31', substr($headerLote, 11, 2));
         $this->assertSame('030', substr($headerLote, 13, 3));
-        // Manual layout 030: pos. 033-052 = BRANCOS (não identificacao/num_empresa).
-        $this->assertSame(str_repeat(' ', 20), substr($headerLote, 32, 20));
+        // G009 também no lote 030 (código de transmissão — não brancos).
+        $this->assertSame('00331234000000123456', substr($headerLote, 32, 20));
     }
 
     public function testHeaderArquivoComNsaEVersao060(): void {
@@ -107,11 +109,43 @@ class RemessaB033Test extends TestCase {
         // Manual V11.7: NSA 158-163 + versão layout 164-166 = 060
         $this->assertSame('000099', substr($headerArquivo, 157, 6));
         $this->assertSame('060', substr($headerArquivo, 163, 3));
-        // G009: BBBB="033 " + AAAA(agência) + CCCCCCCCCCCC(convênio)
-        $this->assertSame('033 1234000000203531', substr($headerArquivo, 32, 20));
-        // Boleto 030: convênio em branco no header de lote
+        // G009: BBBB="0033" + AAAA(agência) + CCCCCCCCCCCC(convênio)
+        $this->assertSame('00331234000000203531', substr($headerArquivo, 32, 20));
         $headerLote = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[1];
-        $this->assertSame(str_repeat(' ', 20), substr($headerLote, 32, 20));
+        $this->assertSame('00331234000000203531', substr($headerLote, 32, 20));
+    }
+
+    /** Piloto 1236 — e-mail banco: 00333686004908487030 nos dois headers. */
+    public function testG009CodigoTransmissaoPiloto4908487030(): void
+    {
+        $remessa = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
+            'agencia'              => '3686',
+            'codigo_empresa_banco' => '4908487030',
+        ]));
+        $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '30',
+            'versao_layout'   => '030',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $esperado = '00333686004908487030';
+        $this->assertSame($esperado, substr($linhas[0], 32, 20), 'header arquivo G009');
+        $this->assertSame($esperado, substr($linhas[1], 32, 20), 'header lote 030 G009');
+
+        $remessa031 = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
+            'agencia'              => '3686',
+            'codigo_empresa_banco' => '4908487030',
+        ]));
+        $remessa031->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '41',
+            'versao_layout'   => '031',
+        ]);
+        $linhas031 = explode("\r\n", rtrim($remessa031->getText(), "\r\n"));
+        $this->assertSame('031', substr($linhas031[1], 13, 3));
+        $this->assertSame($esperado, substr($linhas031[0], 32, 20), 'header arquivo G009 lote 031');
+        $this->assertSame($esperado, substr($linhas031[1], 32, 20), 'header lote 031 G009');
     }
 
     public function testRemessaTedComSegmentosAB(): void {
