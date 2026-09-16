@@ -75,7 +75,7 @@ class Registro1 extends Generico1 {
             'tipo' => 'int',
             'required' => true,
         ],
-        // G009 — mesmo formato do header de arquivo (033+agência+convênio)
+        // G009 — mesmo formato do header de arquivo (0033+agência+convênio)
         'codigo_convenio' => [
             'tamanho' => 20,
             'default' => ' ',
@@ -185,35 +185,10 @@ class Registro1 extends Generico1 {
     }
 
     /**
-     * Pos. 033-052 — Código do Convênio (G009) para lotes Segmento A (versão 031).
-     * Boleto / utilidades (versão 030): brancos (manual).
+     * Pos. 033-052 — G009 no header de lote (030 e 031). O banco recusa lote com brancos.
      */
     protected function set_codigo_convenio($value) {
-        $versao = str_pad(
-            (string) ($this->data['versao_layout']
-                ?? $this->entryData['versao_layout']
-                ?? $this->meta['versao_layout']['default']),
-            3,
-            '0',
-            STR_PAD_LEFT
-        );
-
-        if ($versao === '030') {
-            $this->data['codigo_convenio'] = str_repeat(' ', 20);
-            return;
-        }
-
-        if ($value !== '' && $value !== null && trim((string) $value) !== '') {
-            $this->data['codigo_convenio'] = $value;
-            return;
-        }
-
-        $convenio = preg_replace('/\D/', '', (string) ($this->entryData['codigo_empresa_banco'] ?? ''));
-        $agencia = preg_replace('/\D/', '', (string) ($this->entryData['agencia'] ?? '0'));
-        $agencia4 = substr(str_pad($agencia !== '' ? $agencia : '0', 4, '0', STR_PAD_LEFT), -4);
-        $convenio12 = str_pad($convenio !== '' ? $convenio : '0', 12, '0', STR_PAD_LEFT);
-
-        $this->data['codigo_convenio'] = str_pad('033', 4, ' ', STR_PAD_RIGHT) . $agencia4 . $convenio12;
+        $this->data['codigo_convenio'] = CodigoConvenioG009::montar($this->entryData, $value);
     }
 
     public function inserirBoleto($data) {
