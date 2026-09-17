@@ -69,10 +69,32 @@ class RemessaB033Test extends TestCase {
         $this->assertSame('031', substr($headerLote, 13, 3));
         $this->assertSame('00331234000000123456', substr($linhas[0], 32, 20), 'G009 header arquivo');
         $this->assertSame('00331234000000123456', substr($headerLote, 32, 20), 'G009 header lote 031');
+        $this->assertSame('0000009876541', substr($linhas[0], 58, 13), 'conta 13 header arquivo');
+        $this->assertSame('0000009876541', substr($headerLote, 58, 13), 'conta 13 header lote');
+        $this->assertSame(' ', substr($linhas[0], 71, 1), 'posição 072 header arquivo');
+        $this->assertSame(' ', substr($headerLote, 71, 1), 'posição 072 header lote');
 
         $trailer = $linhas[2];
         $this->assertSame('000001', substr($trailer, 17, 6));
         $this->assertSame('000003', substr($trailer, 23, 6));
+    }
+
+    public function testContaJaComTrezeDigitosNaoDuplicaDv(): void {
+        $remessa = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
+            'conta'    => '0000130029855',
+            'conta_dv' => '5',
+        ]));
+        $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '41',
+            'versao_layout'   => '031',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $this->assertSame('0000130029855', substr($linhas[0], 58, 13));
+        $this->assertSame('0000130029855', substr($linhas[1], 58, 13));
+        $this->assertSame(' ', substr($linhas[0], 71, 1));
+        $this->assertSame(' ', substr($linhas[1], 71, 1));
     }
 
     public function testHeaderLoteBoleto(): void {
@@ -120,6 +142,8 @@ class RemessaB033Test extends TestCase {
     {
         $remessa = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
             'agencia'              => '3686',
+            'conta'                => '13011936',
+            'conta_dv'             => '7',
             'codigo_empresa_banco' => '4908487030',
         ]));
         $remessa->addLote([
@@ -132,6 +156,10 @@ class RemessaB033Test extends TestCase {
         $esperado = '00333686004908487030';
         $this->assertSame($esperado, substr($linhas[0], 32, 20), 'header arquivo G009');
         $this->assertSame($esperado, substr($linhas[1], 32, 20), 'header lote 030 G009');
+        $this->assertSame('0000130119367', substr($linhas[0], 58, 13), 'conta piloto header arquivo');
+        $this->assertSame('0000130119367', substr($linhas[1], 58, 13), 'conta piloto header lote');
+        $this->assertSame(' ', substr($linhas[0], 71, 1), 'posição 072 header arquivo');
+        $this->assertSame(' ', substr($linhas[1], 71, 1), 'posição 072 header lote');
 
         $remessa031 = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
             'agencia'              => '3686',
@@ -182,6 +210,7 @@ class RemessaB033Test extends TestCase {
         $this->assertSame('A', substr($segmentoA, 13, 1));
         $this->assertSame('018', substr($segmentoA, 17, 3));
         $this->assertSame('237', substr($segmentoA, 20, 3));
+        $this->assertSame('BRL', substr($segmentoA, 101, 3));
         $this->assertStringContainsString('FORNECEDOR TESTE LTDA', $segmentoA);
 
         $segmentoB = $linhas[3];

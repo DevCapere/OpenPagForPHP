@@ -95,21 +95,15 @@ class Registro1 extends Generico1 {
             'required' => true,
         ],
         'conta' => [
-            'tamanho' => 12,
+            'tamanho' => 13,
             'default' => '',
             'tipo' => 'int',
             'required' => true,
         ],
-        'filler4' => [
+        'dac' => [
             'tamanho' => 1,
             'default' => ' ',
             'tipo' => 'alfa',
-            'required' => true,
-        ],
-        'dac' => [
-            'tamanho' => 1,
-            'default' => '0',
-            'tipo' => 'int',
             'required' => true,
         ],
         'nome_empresa' => [
@@ -180,8 +174,27 @@ class Registro1 extends Generico1 {
         ],
     ];
 
+    /**
+     * Santander PagFor: conta debitada ocupa 13 posições (059-071), incluindo o DV.
+     */
+    protected function set_conta($value) {
+        $fonte = array_merge(RemessaAbstract::$entryData ?? [], $this->entryData ?? []);
+        $contaInformada = $value !== '' && $value !== null ? $value : ($fonte['conta'] ?? '');
+        $conta = preg_replace('/\D/', '', (string) $contaInformada) ?? '';
+        $dv = preg_replace('/\D/', '', (string) ($fonte['conta_dv'] ?? '')) ?? '';
+
+        if (strlen($conta) < 13 && $dv !== '') {
+            $conta .= substr($dv, -1);
+        }
+
+        $this->data['conta'] = substr(str_pad($conta, 13, '0', STR_PAD_LEFT), -13);
+    }
+
+    /**
+     * Santander PagFor reserva a posição 072; o DV já compõe a conta de 13 dígitos.
+     */
     protected function set_dac($value) {
-        $this->data['dac'] = $value !== '' ? $value : ($this->entryData['conta_dv'] ?? $this->meta['dac']['default']);
+        $this->data['dac'] = ' ';
     }
 
     /**

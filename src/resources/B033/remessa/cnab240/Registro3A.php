@@ -92,7 +92,7 @@ class Registro3A extends Generico3 {
         ],
         'tipo_moeda' => [
             'tamanho' => 3,
-            'default' => 'REA',
+            'default' => 'BRL',
             'tipo' => 'alfa',
             'required' => true,
         ],

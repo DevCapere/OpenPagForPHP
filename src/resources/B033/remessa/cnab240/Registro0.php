@@ -70,21 +70,15 @@ class Registro0 extends Generico0 {
             'required' => true,
         ],
         'conta' => [
-            'tamanho' => 12,
+            'tamanho' => 13,
             'default' => '',
             'tipo' => 'int',
             'required' => true,
         ],
-        'filler4' => [
+        'dac' => [
             'tamanho' => 1,
             'default' => ' ',
             'tipo' => 'alfa',
-            'required' => true,
-        ],
-        'dac' => [
-            'tamanho' => 1,
-            'default' => '0',
-            'tipo' => 'int',
             'required' => true,
         ],
         'nome_empresa' => [
@@ -167,8 +161,25 @@ class Registro0 extends Generico0 {
         ],
     ];
 
+    /**
+     * Santander PagFor: conta debitada ocupa 13 posições (059-071), incluindo o DV.
+     */
+    protected function set_conta($value) {
+        $conta = preg_replace('/\D/', '', (string) $value) ?? '';
+        $dv = preg_replace('/\D/', '', (string) ($this->entryData['conta_dv'] ?? '')) ?? '';
+
+        if (strlen($conta) < 13 && $dv !== '') {
+            $conta .= substr($dv, -1);
+        }
+
+        $this->data['conta'] = substr(str_pad($conta, 13, '0', STR_PAD_LEFT), -13);
+    }
+
+    /**
+     * Santander PagFor reserva a posição 072; o DV já compõe a conta de 13 dígitos.
+     */
     protected function set_dac($value) {
-        $this->data['dac'] = $value !== '' ? $value : ($this->entryData['conta_dv'] ?? $this->meta['dac']['default']);
+        $this->data['dac'] = ' ';
     }
 
     protected function set_hora_geracao($value) {
