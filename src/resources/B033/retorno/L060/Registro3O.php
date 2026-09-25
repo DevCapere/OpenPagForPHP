@@ -139,7 +139,9 @@ class Registro3O extends Generico3
             'required' => true
         ),
         // Filler                                   163 230 X(068) Brancos
-        'seu_numero' => array(
+        // Não reutilizar seu_numero: a chave duplicada apagava o documento
+        // do cliente (123–142) e engolia o número do banco (143–162).
+        'filler' => array(
             'tamanho' => 68,
             'default' => ' ',
             'tipo' => 'alfa',
