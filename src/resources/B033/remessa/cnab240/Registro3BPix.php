@@ -5,12 +5,12 @@ namespace PagForPHP\resources\B033\remessa\cnab240;
 use PagForPHP\resources\generico\remessa\cnab240\Generico3;
 
 /**
- * SISPAG Santander — Segmento B PIX (chave / dados bancários).
+ * Segmento B de PIX por chave ou dados bancários.
  *
- * Manual V11.7 p.16 + G032–G035:
- * 015-016 forma iniciação · 033-067 Info10 · 068-127 Info11 · 128-226 Info12 (chave) · 233-240 ISPB.
- *
- * @see pagamento-fornecedores-layout-CNAB-240.pdf — SEGMENTO B PIX
+ * Manual Pagamento a Fornecedores CNAB 240 V11.6, página 16.
+ * 015-016 forma de iniciação · 033-067 informação 10 · 068-127 informação 11 ·
+ * 128-226 informação 12 · 227-232 reservado · 233-240 ISPB.
+ * Não usar para QR Code dinâmico.
  */
 class Registro3BPix extends Generico3 {
 

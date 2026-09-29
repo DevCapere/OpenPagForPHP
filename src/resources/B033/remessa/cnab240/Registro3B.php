@@ -5,9 +5,12 @@ namespace PagForPHP\resources\B033\remessa\cnab240;
 use PagForPHP\resources\generico\remessa\cnab240\Generico3;
 
 /**
- * SISPAG Santander — Segmento B (complemento favorecido / TED).
+ * Segmento B de TED, crédito em conta, poupança, caixa e OP.
  *
- * @see sispag_cnab_santander_B341.txt — REGISTRO DETALHE SEGMENTO B
+ * Manual Pagamento a Fornecedores CNAB 240 V11.6, página 11.
+ * Obrigatório para TED, caixa e OP. Opcional para crédito em conta e poupança.
+ * Boleto e tributo sem código de barras usam as mesmas colunas (páginas 24 e 31).
+ * PIX usa {@see Registro3BPix}.
  */
 class Registro3B extends Generico3 {
 
@@ -102,20 +105,85 @@ class Registro3B extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        'email' => [
-            'tamanho' => 100,
-            'default' => ' ',
-            'tipo' => 'alfa',
+        'data_vencimento' => [
+            'tamanho' => 8,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true,
+        ],
+        'vlr_documento' => [
+            'tamanho' => 13,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 2,
+            'required' => true,
+        ],
+        'vlr_abatimento' => [
+            'tamanho' => 13,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 2,
+            'required' => true,
+        ],
+        'vlr_desconto' => [
+            'tamanho' => 13,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 2,
+            'required' => true,
+        ],
+        'vlr_mora' => [
+            'tamanho' => 13,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 2,
+            'required' => true,
+        ],
+        'vlr_multa' => [
+            'tamanho' => 13,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 2,
+            'required' => true,
+        ],
+        'hora_envio_ted' => [
+            'tamanho' => 4,
+            'default' => '0',
+            'tipo' => 'int',
             'required' => true,
         ],
         'filler2' => [
-            'tamanho' => 3,
+            'tamanho' => 11,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
         ],
-        'ocorrencias' => [
-            'tamanho' => 10,
+        'codigo_historico' => [
+            'tamanho' => 4,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true,
+        ],
+        'aviso' => [
+            'tamanho' => 1,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true,
+        ],
+        'filler3' => [
+            'tamanho' => 1,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true,
+        ],
+        'ted_instituicao' => [
+            'tamanho' => 1,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true,
+        ],
+        'identificacao_spb' => [
+            'tamanho' => 8,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,

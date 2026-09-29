@@ -175,23 +175,19 @@ class Registro1 extends Generico1 {
     ];
 
     /**
-     * Santander PagFor: conta debitada ocupa 13 posições (059-071), incluindo o DV.
+     * Santander PagFor: conta debitada nas posições 059-071, 13 dígitos, sem o DV.
+     * Conta que já chega com 13 dígitos não perde o último.
      */
     protected function set_conta($value) {
         $fonte = array_merge(RemessaAbstract::$entryData ?? [], $this->entryData ?? []);
         $contaInformada = $value !== '' && $value !== null ? $value : ($fonte['conta'] ?? '');
         $conta = preg_replace('/\D/', '', (string) $contaInformada) ?? '';
-        $dv = preg_replace('/\D/', '', (string) ($fonte['conta_dv'] ?? '')) ?? '';
-
-        if (strlen($conta) < 13 && $dv !== '') {
-            $conta .= substr($dv, -1);
-        }
 
         $this->data['conta'] = substr(str_pad($conta, 13, '0', STR_PAD_LEFT), -13);
     }
 
     /**
-     * Santander PagFor reserva a posição 072; o DV já compõe a conta de 13 dígitos.
+     * Santander PagFor: a posição 072 fica em branco. O DV não entra na conta.
      */
     protected function set_dac($value) {
         $this->data['dac'] = ' ';
