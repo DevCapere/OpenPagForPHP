@@ -2,6 +2,7 @@
 
 namespace PagForPHP\resources\B033\remessa\cnab240;
 
+use PagForPHP\RemessaAbstract;
 use PagForPHP\resources\generico\remessa\cnab240\Generico0;
 
 /**
@@ -162,17 +163,32 @@ class Registro0 extends Generico0 {
     ];
 
     /**
-     * Santander PagFor: conta debitada nas posições 059-071, 13 dígitos, sem o DV.
-     * Conta que já chega com 13 dígitos não perde o último.
+     * Santander PagFor: pos. 059-070 = conta com 12 dígitos; pos. 071 = dígito.
+     * Conta que já chega com 13 dígitos não perde o último e não ganha outro dígito.
      */
     protected function set_conta($value) {
-        $conta = preg_replace('/\D/', '', (string) $value) ?? '';
+        $fonte = array_merge(RemessaAbstract::$entryData ?? [], $this->entryData ?? []);
+        $contaInformada = $value !== '' && $value !== null ? $value : ($fonte['conta'] ?? '');
+        $conta = preg_replace('/\D/', '', (string) $contaInformada) ?? '';
 
-        $this->data['conta'] = substr(str_pad($conta, 13, '0', STR_PAD_LEFT), -13);
+        if (strlen($conta) >= 13) {
+            $this->data['conta'] = substr($conta, -13);
+            return;
+        }
+
+        $dv = preg_replace('/\D/', '', (string) ($fonte['conta_dv'] ?? '')) ?? '';
+        $dv = $dv !== '' ? substr($dv, -1) : '';
+
+        if ($dv === '') {
+            $this->data['conta'] = substr(str_pad($conta, 13, '0', STR_PAD_LEFT), -13);
+            return;
+        }
+
+        $this->data['conta'] = str_pad($conta, 12, '0', STR_PAD_LEFT) . $dv;
     }
 
     /**
-     * Santander PagFor: a posição 072 fica em branco. O DV não entra na conta.
+     * Santander PagFor: a posição 072 fica em branco. O dígito da conta fica na 071.
      */
     protected function set_dac($value) {
         $this->data['dac'] = ' ';
