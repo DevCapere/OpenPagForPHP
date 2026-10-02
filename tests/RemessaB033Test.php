@@ -69,8 +69,8 @@ class RemessaB033Test extends TestCase {
         $this->assertSame('031', substr($headerLote, 13, 3));
         $this->assertSame('00331234000000123456', substr($linhas[0], 32, 20), 'G009 header arquivo');
         $this->assertSame('00331234000000123456', substr($headerLote, 32, 20), 'G009 header lote 031');
-        $this->assertSame('0000000987654', substr($linhas[0], 58, 13), 'conta 13 header arquivo');
-        $this->assertSame('0000000987654', substr($headerLote, 58, 13), 'conta 13 header lote');
+        $this->assertSame('0000009876541', substr($linhas[0], 58, 13), 'conta 12 + dígito header arquivo');
+        $this->assertSame('0000009876541', substr($headerLote, 58, 13), 'conta 12 + dígito header lote');
         $this->assertSame(' ', substr($linhas[0], 71, 1), 'posição 072 header arquivo');
         $this->assertSame(' ', substr($headerLote, 71, 1), 'posição 072 header lote');
 
@@ -97,7 +97,7 @@ class RemessaB033Test extends TestCase {
         $this->assertSame(' ', substr($linhas[1], 71, 1));
     }
 
-    public function testContaSemDigitoCritica1064(): void {
+    public function testContaDigitoNaPosicao071Critica1064(): void {
         $remessa = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
             'conta'    => '13002985',
             'conta_dv' => '5',
@@ -109,8 +109,29 @@ class RemessaB033Test extends TestCase {
         ]);
 
         $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
-        $this->assertSame('0000013002985', substr($linhas[0], 58, 13), 'conta sem dígito no header do arquivo');
-        $this->assertSame('0000013002985', substr($linhas[1], 58, 13), 'conta sem dígito no header do lote');
+        $this->assertSame('0000130029855', substr($linhas[0], 58, 13), 'conta com dígito no header do arquivo');
+        $this->assertSame('0000130029855', substr($linhas[1], 58, 13), 'conta com dígito no header do lote');
+        $this->assertSame('000013002985', substr($linhas[0], 58, 12), 'posições 059-070 header arquivo');
+        $this->assertSame('5', substr($linhas[0], 70, 1), 'posição 071 header arquivo');
+        $this->assertSame(' ', substr($linhas[0], 71, 1), 'posição 072 header arquivo');
+        $this->assertSame(' ', substr($linhas[1], 71, 1), 'posição 072 header lote');
+        $this->assertNotSame('0000013002985', substr($linhas[0], 58, 13));
+    }
+
+    public function testContaDigitoNaPosicao071Empresa1236(): void {
+        $remessa = new Remessa('033', 'cnab240', array_merge($this->headerData(), [
+            'conta'    => '13011936',
+            'conta_dv' => '7',
+        ]));
+        $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '41',
+            'versao_layout'   => '031',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        $this->assertSame('0000130119367', substr($linhas[0], 58, 13), 'conta 1236 header arquivo');
+        $this->assertSame('0000130119367', substr($linhas[1], 58, 13), 'conta 1236 header lote');
         $this->assertSame(' ', substr($linhas[0], 71, 1), 'posição 072 header arquivo');
         $this->assertSame(' ', substr($linhas[1], 71, 1), 'posição 072 header lote');
     }
@@ -174,8 +195,8 @@ class RemessaB033Test extends TestCase {
         $esperado = '00333686004908487030';
         $this->assertSame($esperado, substr($linhas[0], 32, 20), 'header arquivo G009');
         $this->assertSame($esperado, substr($linhas[1], 32, 20), 'header lote 030 G009');
-        $this->assertSame('0000013011936', substr($linhas[0], 58, 13), 'conta piloto header arquivo');
-        $this->assertSame('0000013011936', substr($linhas[1], 58, 13), 'conta piloto header lote');
+        $this->assertSame('0000130119367', substr($linhas[0], 58, 13), 'conta piloto header arquivo');
+        $this->assertSame('0000130119367', substr($linhas[1], 58, 13), 'conta piloto header lote');
         $this->assertSame(' ', substr($linhas[0], 71, 1), 'posição 072 header arquivo');
         $this->assertSame(' ', substr($linhas[1], 71, 1), 'posição 072 header lote');
 
