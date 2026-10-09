@@ -37,9 +37,12 @@ class RemessaB237Test extends TestCase {
         $this->assertSame('0', substr($header, 7, 1));
         $this->assertSame(str_repeat(' ', 9), substr($header, 8, 9));
         $this->assertSame('089', substr($header, 163, 3));
+        $this->assertSame('01600', substr($header, 166, 5));
+        $this->assertSame('   ', substr($header, 171, 3));
         $this->assertSame('1', substr($header, 142, 1));
         $this->assertStringContainsString('BANCO BRADESCO SA', $header);
         $this->assertSame('12345678901234567890', substr($header, 32, 20));
+        $this->assertSame('000000', substr($linhas[1], 29, 6));
     }
 
     public function testHeaderLoteTedFormasPermitidas(): void {
@@ -54,6 +57,7 @@ class RemessaB237Test extends TestCase {
             $headerLote = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[1];
             $this->assertSame($forma, substr($headerLote, 11, 2), "forma $forma");
             $this->assertSame('045', substr($headerLote, 13, 3));
+            $this->assertSame('01', substr($headerLote, 222, 2), "indicativo forma $forma");
         }
     }
 
@@ -83,7 +87,7 @@ class RemessaB237Test extends TestCase {
         $this->assertSame('012', substr($headerLote, 13, 3));
     }
 
-    public function testRemessaTedComSegmentosAB(): void {
+    public function testTedNoLayout(): void {
         $remessa = new Remessa('237', 'cnab240', $this->headerData());
         $lote = $remessa->addLote([
             'tipo_pagamento'  => '20',
@@ -110,11 +114,82 @@ class RemessaB237Test extends TestCase {
             $this->assertSame('237', substr($linha, 0, 3));
         }
 
+        $this->assertSame('   ', substr($linhas[0], 171, 3));
         $this->assertSame('A', substr($linhas[2], 13, 1));
         $this->assertSame('B', substr($linhas[3], 13, 1));
+
+        $segmentoA = $linhas[2];
+        $segmentoB = $linhas[3];
+        $this->assertSame('1', substr($segmentoA, 41, 1), 'DV da conta na coluna 042');
+        $this->assertSame(' ', substr($segmentoA, 42, 1), 'coluna 043 em branco');
+        $this->assertSame('000000554433', substr($segmentoA, 29, 12));
+        $this->assertSame('CC', substr($segmentoA, 224, 2));
+        $this->assertSame('15062026', substr($segmentoB, 127, 8));
+        $this->assertSame('000000000150055', substr($segmentoB, 135, 15));
+        $this->assertSame('000000', substr($linhas[4], 59, 6));
+        $this->assertSame('000000', substr($linhas[5], 29, 6));
     }
 
-    public function testRemessaBoletoComSegmentosJJ52(): void {
+    public function testFinalidadeComplementarPoupanca(): void {
+        $remessa = new Remessa('237', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '41',
+            'versao_layout'   => '045',
+        ]);
+
+        $lote->inserirTransferencia([
+            'banco_favorecido'      => '001',
+            'agencia_favorecido'    => '1234',
+            'conta_favorecido'      => '554433',
+            'conta_dv_favorecido'   => '1',
+            'nome_favorecido'       => 'FORNECEDOR TESTE LTDA',
+            'documento_favorecido'  => '98765432000111',
+            'documento_id'          => 'DOC-001',
+            'data_pagamento'        => '2026-06-15',
+            'valor'                 => 10,
+            'tipo_conta_favorecido' => 'PP',
+        ]);
+
+        $segmentoA = explode("\r\n", rtrim($remessa->getText(), "\r\n"))[2];
+        $this->assertSame('PP', substr($segmentoA, 224, 2));
+    }
+
+    public function testPixIdentificado(): void {
+        $remessa = new Remessa('237', 'cnab240', $this->headerData());
+        $lote = $remessa->addLote([
+            'tipo_pagamento'  => '20',
+            'forma_pagamento' => '45',
+            'versao_layout'   => '045',
+        ]);
+        $lote->inserirTransferencia([
+            'nome_favorecido'      => 'JENNIFER DE SOUZA PERES',
+            'documento_favorecido' => '52988051836',
+            'documento_id'         => '16839',
+            'data_pagamento'       => '2026-10-07',
+            'valor'                => 1.00,
+            'chave_pix'            => '52988051836',
+            'tipo_chave_pix'       => '03',
+        ]);
+
+        $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
+        foreach ($linhas as $linha) {
+            $this->assertSame(240, strlen($linha));
+        }
+
+        $this->assertSame('PIX', substr($linhas[0], 171, 3));
+        $this->assertSame('01600', substr($linhas[0], 166, 5));
+        $this->assertSame('45', substr($linhas[1], 11, 2));
+        $this->assertSame('01', substr($linhas[1], 222, 2));
+        $this->assertSame('009', substr($linhas[2], 17, 3));
+        $this->assertSame('000529880518360000000001', substr($linhas[2], 177, 24));
+        $this->assertSame('03 ', substr($linhas[3], 14, 3));
+        $this->assertSame('52988051836', rtrim(substr($linhas[3], 127, 99)));
+        $this->assertSame('000000', substr($linhas[4], 59, 6));
+        $this->assertSame('000000', substr($linhas[5], 29, 6));
+    }
+
+    public function testBoletoComMoeda(): void {
         $codigoBarras = '23791090000012345678901234567890123456789012';
 
         $remessa = new Remessa('237', 'cnab240', $this->headerData());
@@ -138,7 +213,10 @@ class RemessaB237Test extends TestCase {
         $this->assertCount(6, $linhas);
         $this->assertSame('J', substr($linhas[2], 13, 1));
         $this->assertSame($codigoBarras, substr($linhas[2], 17, 44));
+        $this->assertSame('09', substr($linhas[2], 222, 2));
         $this->assertSame('J', substr($linhas[3], 13, 1));
+        $this->assertSame(' ', substr($linhas[3], 14, 1));
+        $this->assertSame('00', substr($linhas[3], 15, 2));
         $this->assertSame('52', substr($linhas[3], 17, 2));
     }
 

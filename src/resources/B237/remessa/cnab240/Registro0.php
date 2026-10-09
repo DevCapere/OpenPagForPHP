@@ -127,14 +127,22 @@ class Registro0 extends Generico0 {
             'tipo' => 'int',
             'required' => true,
         ],
+        // 167-171. Multipag rejeita zeros: 01600 ou 06250.
         'densidade_gravacao' => [
             'tamanho' => 5,
-            'default' => '0',
+            'default' => '01600',
             'tipo' => 'int',
             'required' => true,
         ],
+        // 172-174. Manual Multipag (jan/2022): literal PIX em caixa alta. Sem isso a forma 45 não é reconhecida.
+        'identificacao_remessa_pix' => [
+            'tamanho' => 3,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true,
+        ],
         'uso_reservado_banco' => [
-            'tamanho' => 20,
+            'tamanho' => 17,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
@@ -208,6 +216,28 @@ class Registro0 extends Generico0 {
             return;
         }
         $this->data['codigo_convenio'] = str_pad(substr($convenio, 0, 20), 20, ' ', STR_PAD_RIGHT);
+    }
+
+    public function getText() {
+        $this->data['identificacao_remessa_pix'] = $this->arquivoEhPix() ? 'PIX' : ' ';
+
+        parent::getText();
+    }
+
+    /**
+     * PIX Multipag vai em arquivo separado (formas 45 e 47).
+     * A literal do header só entra nesse arquivo.
+     */
+    private function arquivoEhPix(): bool {
+        foreach ($this->children ?? [] as $lote) {
+            $forma = preg_replace('/\D/', '', (string) ($lote->getUnformated('forma_pagamento') ?? '')) ?? '';
+            $forma = str_pad($forma, 2, '0', STR_PAD_LEFT);
+            if ($forma === '45' || $forma === '47') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     protected function set_numero_sequencial_arquivo($value) {

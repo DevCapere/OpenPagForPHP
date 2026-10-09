@@ -47,9 +47,17 @@ class Registro3J52 extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        'tipo_movimento' => [
-            'tamanho' => 3,
-            'default' => '000',
+        // 015. Uso exclusivo Febraban — branco. O validador rejeita o zero do movimento aqui.
+        'filler_cnab' => [
+            'tamanho' => 1,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => true,
+        ],
+        // 016-017. Código de movimento da remessa.
+        'codigo_movimento' => [
+            'tamanho' => 2,
+            'default' => '00',
             'tipo' => 'int',
             'required' => true,
         ],

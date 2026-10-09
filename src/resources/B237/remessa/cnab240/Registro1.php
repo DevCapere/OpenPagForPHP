@@ -159,8 +159,15 @@ class Registro1 extends Generico1 {
             'tipo' => 'alfa',
             'required' => true,
         ],
+        // 223-224. Multipag: indicativo da forma de pagamento do serviço. 01 = débito em conta corrente.
+        'indicativo_forma_pagamento' => [
+            'tamanho' => 2,
+            'default' => '01',
+            'tipo' => 'int',
+            'required' => true,
+        ],
         'filler5' => [
-            'tamanho' => 8,
+            'tamanho' => 6,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,

@@ -49,8 +49,15 @@ class Registro9 extends Generico9 {
             'tipo' => 'int',
             'required' => true,
         ],
+        // 030-035. Quantidade de contas para conciliação. Multipag: zeros na remessa.
+        'qtd_contas_conciliacao' => [
+            'tamanho' => 6,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true,
+        ],
         'filler2' => [
-            'tamanho' => 211,
+            'tamanho' => 205,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
