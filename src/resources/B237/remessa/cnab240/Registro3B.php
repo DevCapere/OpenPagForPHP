@@ -105,10 +105,11 @@ class Registro3B extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
+        // 128-135. Multipag rejeita zeros na TED: usa a data do pagamento.
         'data_vencimento' => [
             'tamanho' => 8,
-            'default' => '0',
-            'tipo' => 'int',
+            'default' => '',
+            'tipo' => 'date',
             'required' => true,
         ],
         'vlr_documento' => [
@@ -206,6 +207,56 @@ class Registro3B extends Generico3 {
             : ($this->entryData['documento_favorecido'] ?? '0');
 
         $this->data['numero_inscricao_favorecido'] = preg_replace('/\D/', '', (string) $documento);
+    }
+
+    protected function set_data_vencimento($value) {
+        $informado = $this->dataUtil($value);
+        if ($informado === '') {
+            $informado = $this->dataUtil($this->entryData['data_pagamento'] ?? '');
+        }
+        if ($informado === '') {
+            $informado = date('Y-m-d');
+        }
+
+        $this->data['data_vencimento'] = $informado;
+    }
+
+    protected function set_vlr_documento($value) {
+        if ($this->valorInformado($value)) {
+            $this->data['vlr_documento'] = $value;
+            return;
+        }
+
+        $fallback = $this->entryData['valor']
+            ?? $this->entryData['valor_pagamento']
+            ?? 0;
+        $this->data['vlr_documento'] = $fallback;
+    }
+
+    private function dataUtil($value): string {
+        $bruto = trim((string) ($value ?? ''));
+        if ($bruto === '' || preg_match('/^0+$/', $bruto)) {
+            return '';
+        }
+
+        if (preg_match('/^\d{2}\/\d{2}\/\d{4}$/', $bruto)) {
+            $partes = explode('/', $bruto);
+            return $partes[2] . '-' . $partes[1] . '-' . $partes[0];
+        }
+
+        if (preg_match('/^\d{8}$/', $bruto)) {
+            return substr($bruto, 4, 4) . '-' . substr($bruto, 2, 2) . '-' . substr($bruto, 0, 2);
+        }
+
+        return $bruto;
+    }
+
+    private function valorInformado($value): bool {
+        if ($value === '' || $value === null) {
+            return false;
+        }
+
+        return (float) $value != 0.0;
     }
 
 }
