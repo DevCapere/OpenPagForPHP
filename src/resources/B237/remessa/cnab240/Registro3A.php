@@ -148,7 +148,7 @@ class Registro3A extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        // G013 B — CC / PP (default CC se branco)
+        // 225-226. G013 C — CC (corrente) ou PP (poupança). Multipag rejeita branco.
         'finalidade_complementar' => [
             'tamanho' => 2,
             'default' => ' ',
@@ -214,10 +214,21 @@ class Registro3A extends Generico3 {
 
         $agencia = str_pad(preg_replace('/\D/', '', $this->entryData['agencia_favorecido'] ?? '0'), 5, '0', STR_PAD_LEFT);
         $conta = str_pad(preg_replace('/\D/', '', $this->entryData['conta_favorecido'] ?? '0'), 12, '0', STR_PAD_LEFT);
-        $dvConta = $this->entryData['conta_dv_favorecido'] ?? ' ';
-        $dvAgencia = $this->entryData['agencia_dv_favorecido'] ?? ' ';
+        $dvConta = $this->digitoOuBranco($this->entryData['conta_dv_favorecido'] ?? ' ');
+        $dvAgencia = $this->digitoOuBranco($this->entryData['agencia_dv_favorecido'] ?? ' ');
 
-        $this->data['agencia_conta_favorecido'] = $agencia . $dvAgencia . $conta . ' ' . $dvConta;
+        // 024-028 agência, 029 DV agência, 030-041 conta, 042 DV conta, 043 branco.
+        // O espaço antes do DV jogava o dígito na 043 e o Multipag lia a 042 vazia.
+        $this->data['agencia_conta_favorecido'] = $agencia . $dvAgencia . $conta . $dvConta . ' ';
+    }
+
+    private function digitoOuBranco($value): string {
+        $dv = trim((string) ($value ?? ''));
+        if ($dv === '') {
+            return ' ';
+        }
+
+        return substr($dv, 0, 1);
     }
 
     protected function set_informacao_2($value) {
@@ -231,20 +242,57 @@ class Registro3A extends Generico3 {
             ?? $this->entryData['finalidade_detalhe']
             ?? $this->entryData['mensagem']
             ?? ' ';
-        $this->data['informacao_2'] = $legacy;
-    }
-
-    protected function set_finalidade_complementar($value) {
-        if ($value !== '' && $value !== null && trim((string) $value) !== '') {
-            $this->data['finalidade_complementar'] = $value;
+        if ($this->isPixChave() && trim((string) $legacy) === '') {
+            $this->data['informacao_2'] = $this->identificacaoPixG031();
             return;
         }
 
-        // Compat Itaú: finalidade_doc às vezes traz CC/PP
-        $legacy = $this->entryData['finalidade_complementar']
-            ?? $this->entryData['finalidade_doc']
-            ?? ' ';
-        $this->data['finalidade_complementar'] = $legacy;
+        $this->data['informacao_2'] = $legacy;
+    }
+
+    /**
+     * G031 — identificação PIX no Segmento A (178-217): CPF/CNPJ 14 + ISPB 8 + tipo de conta 2.
+     * 01 corrente, 02 conta pagamento, 03 poupança.
+     */
+    private function identificacaoPixG031(): string {
+        $documento = preg_replace('/\D/', '', (string) ($this->entryData['documento_favorecido'] ?? '')) ?? '';
+        $documento = str_pad(substr($documento, 0, 14), 14, '0', STR_PAD_LEFT);
+        $ispb = preg_replace('/\D/', '', (string) ($this->entryData['codigo_ispb'] ?? $this->entryData['ispb'] ?? '')) ?? '';
+        $ispb = str_pad(substr($ispb, 0, 8), 8, '0', STR_PAD_LEFT);
+        $tipoConta = $this->finalidadeComplementarPorTipoConta() === 'PP' ? '03' : '01';
+
+        return $documento . $ispb . $tipoConta;
+    }
+
+    protected function set_finalidade_complementar($value) {
+        $informado = trim((string) ($value ?? ''));
+        if ($informado === '') {
+            $informado = trim((string) (
+                $this->entryData['finalidade_complementar']
+                ?? $this->entryData['finalidade_doc']
+                ?? ''
+            ));
+        }
+
+        if ($informado === '' && !$this->isPixChave()) {
+            $informado = $this->finalidadeComplementarPorTipoConta();
+        }
+
+        $this->data['finalidade_complementar'] = $informado !== '' ? substr($informado, 0, 2) : ' ';
+    }
+
+    private function finalidadeComplementarPorTipoConta(): string {
+        $tipo = strtoupper(trim((string) (
+            $this->entryData['tipo_conta_favorecido']
+            ?? $this->entryData['tipo_conta']
+            ?? ''
+        )));
+
+        if (in_array($tipo, ['PP', 'POUPANCA', 'POUPANÇA', 'CP', '2'], true)) {
+            return 'PP';
+        }
+
+        return 'CC';
     }
 
     protected function set_data_pagamento($value) {

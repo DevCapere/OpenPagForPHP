@@ -56,8 +56,15 @@ class Registro5 extends Generico5 {
             'tipo' => 'int',
             'required' => true,
         ],
+        // 060-065. Número aviso de débito. Multipag: informar zeros na remessa.
+        'num_aviso_debito' => [
+            'tamanho' => 6,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true,
+        ],
         'filler2' => [
-            'tamanho' => 171,
+            'tamanho' => 165,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,

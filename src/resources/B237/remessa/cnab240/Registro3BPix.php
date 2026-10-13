@@ -8,8 +8,8 @@ use PagForPHP\resources\generico\remessa\cnab240\Generico3;
  * Segmento B de PIX por chave ou dados bancários.
  *
  * Manual Pagamento a Fornecedores CNAB 240 V11.6, página 16.
- * 015-016 forma de iniciação · 237-067 informação 10 · 068-127 informação 11 ·
- * 128-226 informação 12 · 227-232 reservado · 233-240 ISPB.
+ * G100 forma de iniciação nas colunas 015-017 (3) · 033-067 informação 10 ·
+ * 068-127 informação 11 · 128-226 chave · 227-232 UG · 233-240 ISPB.
  * Não usar para QR Code dinâmico.
  */
 class Registro3BPix extends Generico3 {
@@ -45,15 +45,9 @@ class Registro3BPix extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        // G032 — Forma de Iniciação
+        // G100 — 015-017. 01 telefone, 02 e-mail, 03 CPF/CNPJ, 04 aleatória, 05 dados bancários.
         'tipo_chave_pix' => [
-            'tamanho' => 2,
-            'default' => ' ',
-            'tipo' => 'alfa',
-            'required' => true,
-        ],
-        'filler1' => [
-            'tamanho' => 1,
+            'tamanho' => 3,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
@@ -91,10 +85,11 @@ class Registro3BPix extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        'filler_reservado' => [
+        // P012 — 227-232, numérico.
+        'codigo_ug' => [
             'tamanho' => 6,
-            'default' => ' ',
-            'tipo' => 'alfa',
+            'default' => '0',
+            'tipo' => 'int',
             'required' => true,
         ],
         // G030 — ISPB (zeros quando iniciação por chave)

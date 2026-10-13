@@ -145,14 +145,22 @@ class Registro3J extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        'filler1' => [
-            'tamanho' => 13,
+        // 203-222. Remessa em branco; o banco devolve o nosso número.
+        'nosso_numero' => [
+            'tamanho' => 20,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
         ],
-        'nosso_numero' => [
-            'tamanho' => 15,
+        // 223-224. G065: 09 = Real.
+        'codigo_moeda' => [
+            'tamanho' => 2,
+            'default' => '09',
+            'tipo' => 'int',
+            'required' => true,
+        ],
+        'filler1' => [
+            'tamanho' => 6,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => true,
