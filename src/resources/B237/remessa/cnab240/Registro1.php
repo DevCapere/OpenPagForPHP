@@ -293,9 +293,10 @@ class Registro1 extends Generico1 {
         $valorTotal = 0.0;
 
         foreach ($this->children as $child) {
-            // Nota 17: soma só inclusão (000/001/002/003). Complementos (J-52) não são children do lote.
+            // Soma inclusão liberada e bloqueada (000/001/002/003/009). Sem o 009 o trailer zera.
+            // Complementos (J-52) não são children do lote.
             $tipoMovimento = (string) ($child->getUnformated('tipo_movimento') ?? '000');
-            if (in_array($tipoMovimento, ['000', '001', '002', '003'], true)) {
+            if (in_array($tipoMovimento, ['000', '001', '002', '003', '009'], true)) {
                 $valorTotal += $this->valorPagamentoDetalhe($child);
             }
             $child->getText();

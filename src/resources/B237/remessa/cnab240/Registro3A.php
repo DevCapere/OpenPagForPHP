@@ -47,10 +47,10 @@ class Registro3A extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
-        // G011 (1) + G012 (2) — Inclusão liberada = 000
+        // G060 (1) + G061 (2) — Inclusão bloqueada = 009 (agenda e espera autorização)
         'tipo_movimento' => [
             'tamanho' => 3,
-            'default' => '000',
+            'default' => '009',
             'tipo' => 'int',
             'required' => true,
         ],

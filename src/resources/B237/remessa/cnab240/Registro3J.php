@@ -44,9 +44,10 @@ class Registro3J extends Generico3 {
             'tipo' => 'alfa',
             'required' => true,
         ],
+        // G060 + G061 — Inclusão bloqueada = 009
         'tipo_movimento' => [
             'tamanho' => 3,
-            'default' => '000',
+            'default' => '009',
             'tipo' => 'int',
             'required' => true,
         ],
