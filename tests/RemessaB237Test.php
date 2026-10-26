@@ -116,6 +116,7 @@ class RemessaB237Test extends TestCase {
 
         $this->assertSame('   ', substr($linhas[0], 171, 3));
         $this->assertSame('A', substr($linhas[2], 13, 1));
+        $this->assertSame('009', substr($linhas[2], 14, 3));
         $this->assertSame('B', substr($linhas[3], 13, 1));
 
         $segmentoA = $linhas[2];
@@ -126,6 +127,7 @@ class RemessaB237Test extends TestCase {
         $this->assertSame('CC', substr($segmentoA, 224, 2));
         $this->assertSame('15062026', substr($segmentoB, 127, 8));
         $this->assertSame('000000000150055', substr($segmentoB, 135, 15));
+        $this->assertSame('000000000000150055', substr($linhas[4], 23, 18));
         $this->assertSame('000000', substr($linhas[4], 59, 6));
         $this->assertSame('000000', substr($linhas[5], 29, 6));
     }
@@ -181,6 +183,7 @@ class RemessaB237Test extends TestCase {
         $this->assertSame('01600', substr($linhas[0], 166, 5));
         $this->assertSame('45', substr($linhas[1], 11, 2));
         $this->assertSame('01', substr($linhas[1], 222, 2));
+        $this->assertSame('009', substr($linhas[2], 14, 3));
         $this->assertSame('009', substr($linhas[2], 17, 3));
         $this->assertSame('000529880518360000000001', substr($linhas[2], 177, 24));
         $this->assertSame('03 ', substr($linhas[3], 14, 3));
@@ -212,6 +215,7 @@ class RemessaB237Test extends TestCase {
         $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
         $this->assertCount(6, $linhas);
         $this->assertSame('J', substr($linhas[2], 13, 1));
+        $this->assertSame('009', substr($linhas[2], 14, 3));
         $this->assertSame($codigoBarras, substr($linhas[2], 17, 44));
         $this->assertSame('09', substr($linhas[2], 222, 2));
         $this->assertSame('J', substr($linhas[3], 13, 1));
@@ -242,6 +246,7 @@ class RemessaB237Test extends TestCase {
         $linhas = explode("\r\n", rtrim($remessa->getText(), "\r\n"));
         $this->assertCount(5, $linhas);
         $this->assertSame('O', substr($linhas[2], 13, 1));
+        $this->assertSame('009', substr($linhas[2], 14, 3));
         $this->assertSame($barras44 . '    ', substr($linhas[2], 17, 48));
     }
 
