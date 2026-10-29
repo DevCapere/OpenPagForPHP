@@ -30,8 +30,8 @@ use PagForPHP\RetornoAbstract;
 use PagForPHP\DetalhaMovimentoRetorno;
 
 /**
- * @version 11.3.1
- * @link https://cms.santander.com.br/sites/WPS/documentos/arq-layout-pagamento-fornecedores-mai22/23-03-07_150124_pagamento_a_fornecedores_layout_cnab_240_v11.3.2_newpt.pdf
+ * Retorno Multipag Bradesco 237 layout 089 — segmento O.
+ * Barras 48 e moeda REA, igual à remessa. O mapa Santander de barras 44 desloca nome e data.
  */
 class Registro3O extends Generico3
 {
@@ -88,35 +88,43 @@ class Registro3O extends Generico3
             'tipo' => 'int',
             'required' => true
         ),
-        // Código de Barras                         018 061 X(044) Nota N002
+        // Código de Barras                         018 065 X(048) arrecadação Bradesco
         'codigo_barras' => array(
-            'tamanho' => 44,
+            'tamanho' => 48,
             'default' => '0',
             'tipo' => 'alfa',
             'required' => true
         ),
-        // Nome Concessionária / Órgão Público      062 091 X(030) Obrigatório
+        // Nome Concessionária                      066 095 X(030)
         'nome_concessionaria' => array(
             'tamanho' => 30,
             'default' => '0',
             'tipo' => 'alfa',
             'required' => true
         ),
-        // Data de Vencimento                       092 099 9(008) DDMMAAAA
+        // Data de Vencimento                       096 103 9(008) DDMMAAAA
         'data_vencimento' => array(
             'tamanho' => 8,
             'default' => '',
             'tipo' => 'date',
             'required' => true
         ),
-        // Data do Pagamento                        100 107 9(008) DDMMAAAA
-        'data_pagamento' => array(
-            'tamanho' => 8,
-            'default' => '',
-            'tipo' => 'date',
+        // Código da Moeda                          104 106 X(003) REA
+        'codigo_moeda' => array(
+            'tamanho' => 3,
+            'default' => 'REA',
+            'tipo' => 'alfa',
             'required' => true
         ),
-        // Valor Total do Pagamento                 108 122 9(013)V2 Nota G022
+        // Quantidade da Moeda                      107 121 9(007)V9(008) — só ocupa posição
+        'quantidade_moeda' => array(
+            'tamanho' => 7,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 8,
+            'required' => true
+        ),
+        // Valor do Pagamento                       122 136 9(013)V2
         'vlr_pagamento' => array(
             'tamanho' => 13,
             'default' => '',
@@ -124,30 +132,64 @@ class Registro3O extends Generico3
             'precision' => 2,
             'required' => true
         ),
-        // Nro. do Documento Cliente                123 142 X(020) Nota G006
+        // Data do Pagamento                        137 144 9(008) DDMMAAAA
+        'data_pagamento' => array(
+            'tamanho' => 8,
+            'default' => '',
+            'tipo' => 'date',
+            'required' => true
+        ),
+        // Valor Pago                               145 159 9(013)V2 — só ocupa posição
+        'valor_pago' => array(
+            'tamanho' => 13,
+            'default' => '0',
+            'tipo' => 'decimal',
+            'precision' => 2,
+            'required' => true
+        ),
+        // Filler                                   160 162 X(003)
+        'filler' => array(
+            'tamanho' => 3,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => false
+        ),
+        // Nota Fiscal                              163 171 9(009)
+        'nota_fiscal' => array(
+            'tamanho' => 9,
+            'default' => '0',
+            'tipo' => 'int',
+            'required' => true
+        ),
+        // Filler                                   172 174 X(003)
+        'filler2' => array(
+            'tamanho' => 3,
+            'default' => ' ',
+            'tipo' => 'alfa',
+            'required' => false
+        ),
+        // Nro. do Documento Cliente                175 194 X(020)
         'seu_numero' => array(
             'tamanho' => 20,
             'default' => '0',
             'tipo' => 'alfa',
             'required' => true
         ),
-        // Nro. do Documento Banco                  143 162 X(020) Nota G017
-        'nosso_numero' => array(
-            'tamanho' => 20,
-            'default' => '0',
-            'tipo' => 'alfa',
-            'required' => true
-        ),
-        // Filler                                   163 230 X(068) Brancos
-        // Não reutilizar seu_numero: a chave duplicada apagava o documento
-        // do cliente (123–142) e engolia o número do banco (143–162).
-        'filler' => array(
-            'tamanho' => 68,
+        // Filler                                   195 215 X(021)
+        'filler3' => array(
+            'tamanho' => 21,
             'default' => ' ',
             'tipo' => 'alfa',
             'required' => false
         ),
-        // Ocorrência para Retorno                  231 240 X(010) Nota G007
+        // Nro. do Documento Banco                  216 230 X(015)
+        'nosso_numero' => array(
+            'tamanho' => 15,
+            'default' => '0',
+            'tipo' => 'alfa',
+            'required' => true
+        ),
+        // Ocorrência para Retorno                  231 240 X(010)
         'codigo_ocorrencia' => array(
             'tamanho' => 10,
             'default' => '0',
