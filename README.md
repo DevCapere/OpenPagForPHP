@@ -10,7 +10,13 @@ docker-compose up -d
 ## Instalando via composer:
 
 
-Adicione `"devcapere/openpagforphp": "dev-master"` ao seu composer.json e rode update ou install
+Adicione `"devcapere/openpagforphp": "dev-master"` ao seu composer.json e rode update ou install.
+
+Produção (SUS-5423):
+
+- Sempre rode `composer update devcapere/openpagforphp` ou `composer install` para instalar o pacote. Copiar o arquivo no vendor não publica a versão.
+- Em produção o pacote não pode ser referenciado por path local.
+- O `composer.lock` de quem consome a lib deve apontar para um commit específico da `master`.
 
 ## Status de desenvolvimento
 <table>
