@@ -291,9 +291,27 @@ class Registro3A extends Generico3
             substr(RetornoAbstract::$lines[RetornoAbstract::$linesCounter], 13, 1) == 'B'
         ) {
 
-            $class = 'PagForPHP\resources\\B' . RetornoAbstract::$banco . '\retorno\\' . RetornoAbstract::$layout . '\Registro3B';
+            $segmentoB = ((int) $this->codigo_camara_compensacao) === 9
+                ? 'Registro3BPix'
+                : 'Registro3B';
+            $class = 'PagForPHP\resources\\B' . RetornoAbstract::$banco . '\retorno\\' . RetornoAbstract::$layout . '\\' . $segmentoB;
             $this->children[] = new $class(RetornoAbstract::$lines[RetornoAbstract::$linesCounter]);
         }
+    }
+
+    /**
+     * Data real 00000000 não é data. Só este retorno B237. O leitor genérico não muda.
+     */
+    public function set_data_pagamento_real($value)
+    {
+        $digits = preg_replace('/\D/', '', (string) $value);
+        if ($digits === '' || preg_match('/^0+$/', $digits)) {
+            $this->data['data_pagamento_real'] = '';
+            return;
+        }
+
+        $data = \DateTime::createFromFormat('dmY', sprintf('%08d', $digits));
+        $this->data['data_pagamento_real'] = $data ? $data->format('Y-m-d') : '';
     }
 
     /**
